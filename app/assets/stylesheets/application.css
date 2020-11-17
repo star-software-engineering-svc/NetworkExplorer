@@ -13,3 +13,93 @@
  *= require_tree .
  *= require_self
  */
+
+html, body {
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    background: black;
+}
+
+div.nt-panel {
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+div.nt-container {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    background: white;
+}
+
+div.nt-header {
+    width: 100%;
+    height: 100px;
+    background: white;
+}
+
+div.nt-footer {
+    width: 100%;
+    height: 60px;
+    background: white;
+}
+
+div.nt-body {
+    width: 100%;
+    height: calc(100vh - 160px);
+    background: #f9fbfc;
+}
+
+button.nt-button {
+    background: #ee5149;
+}
+
+div.welcome-text {
+    color: #193053;
+}
+
+div.light-color {
+    color: #595959;
+}
+
+div.login-form {
+    padding: 30px 0px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+div.nt-input {
+    height: 50px;
+    padding: 12px 20px;
+    margin-bottom: 17px;
+    border-radius: 5px;
+    background: white;
+    box-shadow: rgba(149, 157, 165, 0.1) 0px 8px 24px;
+}
+
+div.nt-input > input {
+    width: 100%;
+    border: none;
+}
+
+div.nt-input > input:focus {
+    outline: none;
+    outline-width: 0;
+}
+
+/* Change the white to any color ;) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active  {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
+button.btn-danger {
+    background-color: #ee5149;
+    border-color: #ee5149;
+    padding: 10px;
+}
