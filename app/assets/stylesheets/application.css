@@ -132,6 +132,10 @@ div.nt-panel {
     box-shadow: rgba(149, 157, 165, 0.1) 0px 8px 24px;
 }
 
+div.nt-panel-header {
+    padding: 30px;
+}
+
 .stats {
     text-align: center;
     padding-top: 5px;
@@ -189,4 +193,103 @@ div.nt-panel {
     width: 100%;
     height: 360px;
     border-radius: 5px;
+}
+
+table.domain-table {
+    width: 100%;
+    min-width: 380px;
+    font-size: 12px;
+}
+
+table.domain-table thead {
+    background: #f9fafc;
+}
+
+table.domain-table th {
+    color: #98a3b7;
+    font-weight: 300;
+}
+
+table.domain-table thead th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+table.domain-table thead th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+table.domain-table tbody tr {
+    border-bottom: 1px solid #e9ecf3;
+}
+
+table.domain-table tbody td {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+table.domain-table tbody > tr:last-of-type {
+    border-bottom: none!important;
+}
+
+
+.table-text {
+    color: #193053;
+    font-weight: 500;
+}
+
+.row-border {
+    background: #e9ecf3;
+    width: 100%;
+    height: 1px;
+}
+
+
+div.nt-dropdown-group {
+    font-size: 13px;
+    position: relative;
+    width: max-content;
+}
+
+div.nt-dropdown-group > button.btn-link:hover, div.nt-dropdown-group > button.btn-link:focus {
+    text-decoration: none;
+}
+
+div.nt-dropdown-group > button.btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+div.nt-dropdown {
+    position: absolute;
+    right: 25px;
+    top: 23px;
+    padding: 10px 20px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    background: white;
+    box-shadow: rgba(149, 157, 165, 0.25) 0px 8px 24px;
+}
+
+div.nt-dropdown a {
+    display: block;
+    text-decoration: none;
+    font-size: 13px;
+    color: #757575;
+    line-height: 25px;
+}
+
+div.nt-dropdown a:hover {
+    color: #ee5149;
+}
+
+div.nt-dropdown a.opt-selected {
+    color: #ee5149;
+}
+
+div.nt-dropdown .caret {
+    position: absolute;
+    right: 0px;
+    top: -5px;
 }

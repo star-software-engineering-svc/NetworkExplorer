@@ -81,7 +81,7 @@
         </div>
       </div>
     </div>
-    <h5 class="welcome-text">GEOIP</h5>
+    <h5 class="welcome-text mt-4">GEOIP</h5>
     <div class="nt-panel">
       <div class="row no-gutters">
         <div class="col-sm-6 col-md-3">
@@ -120,14 +120,100 @@
 </div>
 
 <div class="row" style="margin-left: 0px; margin-right: 0px;">
-  <div class="col-md-6 col-lg-5 offset-lg-1">
-    <div class="nt-panel mb-5">
+  <div class="col-sm-12 col-md-6 col-lg-5 offset-lg-1">
+    <div class="nt-panel mb-5" style="padding: 0px;">
+      <div class="clearfix nt-panel-header">
+        <div class="header-title" style="float: left;">
+          <h5 class="welcome-text mb-0">Domain</h5>
+        </div>
+        <div class="header-tools" style="float: right">
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px; color: #757575;">
+              <span>Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:void(0)">Show: 10</a>
+              <a class="" href="javascript:void(0)">Show: 100</a>
+              <a class="" href="javascript:void(0)">Show: 1000</a>
+            </div>
+          </div>
 
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
+              <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:void(0)">Export</a>
+              <a class="" href="javascript:void(0)">Export all</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nt-panel-body" style="margin: 0px 20px 20px 20px; overflow: auto;">
+        <table class="domain-table">
+          <thead>
+            <tr>
+              <th>DOMAIN NAME</th>
+              <th># REQUESTS</th>
+              <th>LAST CHECK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="table-text">jqoeugnvmapqurnz</td>
+              <td class="table-text">24</td>
+              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
+            </tr>
+            <tr>
+              <td class="table-text">jqoeugnvmapqurnz</td>
+              <td class="table-text">24</td>
+              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
+            </tr>
+            <tr>
+              <td class="table-text">jqoeugnvmapqurnz</td>
+              <td class="table-text">24</td>
+              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div class="col-md-6 col-lg-5">
-    <div class="nt-panel mb-5">
-
+    <div class="nt-panel mb-5" style="padding: 0px;">
+      <div class="clearfix nt-panel-header" style="border-bottom: 1px solid #e6e6e6d6;">
+        <div class="header-title" style="float: left;">
+          <h5 class="welcome-text mb-0">Domain</h5>
+        </div>
+        <div class="header-tools" style="float: right">
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px; color: #757575;">
+              <span>Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:void(0)">Show: 10</a>
+              <a class="" href="javascript:void(0)">Show: 100</a>
+              <a class="" href="javascript:void(0)">Show: 1000</a>
+            </div>
+          </div>
+          
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
+              <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:void(0)">Export</a>
+              <a class="" href="javascript:void(0)">Export all</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nt-panel-body">
+      </div>
     </div>
   </div>
 </div>
@@ -141,4 +227,22 @@ function initMap() {
     zoom: 8,
   });
 }
+
+$(document).ready(function() {
+  $(".dropdown-button").on("click", function(e) {
+    e.stopPropagation();
+    $(".nt-dropdown").hide();
+    $(this).siblings(".nt-dropdown").toggle();
+  });
+
+  $(".nt-dropdown > a").on("click", function() {
+    $(this).parents(".nt-dropdown").children("a").removeClass("opt-selected");
+    $(this).addClass("opt-selected");
+    $(this).parents(".nt-dropdown-group").children("button").children("span").html($(this).html());
+  });
+
+  $("body").on("click", function() {
+    $(".nt-dropdown").hide();
+  });
+});
 </script>
