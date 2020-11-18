@@ -22,6 +22,19 @@ html, body {
     background: black;
 }
 
+* {
+    color: #757575;
+}
+
+a {
+    color: #595959;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #595959;
+}
+
 div.nt-panel {
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
@@ -35,20 +48,24 @@ div.nt-container {
 }
 
 div.nt-header {
+    position: relative;
     width: 100%;
     height: 100px;
     background: white;
+    box-shadow: rgba(100, 100, 111, 0.05) 0px 1px 16px 4px;
 }
 
 div.nt-footer {
     width: 100%;
     height: 60px;
     background: white;
+    position: relative;
+    box-shadow: rrgba(100, 100, 111, 0.01) 0px 1px 14px 1px;
 }
 
 div.nt-body {
     width: 100%;
-    height: calc(100vh - 160px);
+    min-height: calc(100vh - 160px);
     background: #f9fbfc;
 }
 
@@ -56,7 +73,7 @@ button.nt-button {
     background: #ee5149;
 }
 
-div.welcome-text {
+.welcome-text {
     color: #193053;
 }
 
@@ -65,7 +82,7 @@ div.light-color {
 }
 
 div.login-form {
-    padding: 30px 0px;
+    padding: 5px;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -102,4 +119,74 @@ button.btn-danger {
     background-color: #ee5149;
     border-color: #ee5149;
     padding: 10px;
+}
+
+.normal-font-weight {
+    font-weight: 300;
+}
+
+div.nt-panel {
+    padding: 15px;
+    border-radius: 5px;
+    background: white;
+    box-shadow: rgba(149, 157, 165, 0.1) 0px 8px 24px;
+}
+
+.stats {
+    text-align: center;
+    padding-top: 5px;
+}
+
+.stats > div:first-child {
+    color: #757575;
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.stats > div:nth-child(2) {
+    color: #193053;
+    font-size: 15px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.stats-cell {
+    width: 50%;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+    .stats-cell {
+        width: 33%;
+    }
+}
+
+@media (min-width: 768px) {
+    .stats-cell {
+        width: 33%;
+    }
+}
+
+@media (min-width: 992px) {
+    .stats-cell {
+        width: 11%;
+    }
+}
+
+@media (min-width: 1200px) {
+    .stats-cell {
+        width: 11%;
+    }
+}
+
+#map {
+    width: 100%;
+    height: 360px;
+    border-radius: 5px;
 }

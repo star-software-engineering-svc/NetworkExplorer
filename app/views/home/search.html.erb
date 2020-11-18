@@ -1,0 +1,144 @@
+
+<script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC82TqNKcy4RjJs-Pj-7Y-FK76RlUeEV5s&callback=initMap">
+</script>
+
+<div class="row" style="margin: 0px;">
+  <div class="col-12">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">Network Explorer</h1>
+    <p class="text-center" style="font-size: 14px; margin-bottom: 25px;">Learn information about a site or IP address</p>
+    <div class="login-form" style="">
+      <form method="get">
+        <div class="row">
+          <div class="col-8" style="padding: 0px;">
+            <input type="text" class="form-control" style="height: 46px;" name="query">
+          </div>
+          <div class="col-4" style="padding: 0px 0px 0px 5px;">
+            <button type="submit" class="btn btn-danger w-100">Explore</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <h5 class="welcome-text">WHOIS</h5>
+    <div class="nt-panel">
+      <div class="w-100" style="margin: 0px; padding: 0px;">
+        <div class="stats-cell">
+          <div class="stats">
+            <div>Netrange</div>
+            <div>180 M</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Cidr</div>
+            <div>324RTFG</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Name</div>
+            <div>TEL-DK-NT</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Parent</div>
+            <div>456YHGB</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Net Type</div>
+            <div>12RTY7</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Origin As</div>
+            <div>TELECOM AS</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Organization</div>
+            <div>TELECOM.NET</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Reg.Date</div>
+            <div>24.02.2017</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Last Update</div>
+            <div>TODAY</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h5 class="welcome-text">GEOIP</h5>
+    <div class="nt-panel">
+      <div class="row no-gutters">
+        <div class="col-sm-6 col-md-3">
+          <div class="stats">
+            <div>City</div>
+            <div>NEW YORK</div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="stats">
+            <div>State</div>
+            <div>ny</div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="stats">
+            <div>Country</div>
+            <div>US</div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+          <div class="stats">
+            <div>Long/Lat</div>
+            <div>58.38930, -101.52910</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-2 mb-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <div id="map"></div>
+  </div>
+</div>
+
+<div class="row" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-6 col-lg-5 offset-lg-1">
+    <div class="nt-panel mb-5">
+
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-5">
+    <div class="nt-panel mb-5">
+
+    </div>
+  </div>
+</div>
+
+<script>
+let map;
+
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: -34.397, lng: 150.644 },
+    zoom: 8,
+  });
+}
+</script>

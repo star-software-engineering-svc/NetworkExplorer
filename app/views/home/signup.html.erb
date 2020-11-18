@@ -1,0 +1,21 @@
+
+<div class="row" style="margin: 0px;">
+  <div class="col-36">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px;">Welcome Back</h1>
+    <form action="<%= home_login_path() %>" method="post">
+      <div class="login-form">
+        <div class="nt-input">
+          <input type="text" name="name" placeholder="Full name"/>
+        </div>
+        <div class="nt-input">
+          <input type="text" name="email" placeholder="Email"/>
+        </div>
+        <div class="nt-input">
+          <input type="password" name="password" placeholder="Password"/>
+        </div>
+        <button type="submit" class="btn btn-danger w-100 mt-5">Create Account</button>
+        <p class="text-center mt-4 normal-font-weight">Already have an account? <a href="<%= home_index_path() %>" style="font-weight: 500;">Log in</a></p>
+      </div>
+    </form>
+  </div>
+</div>

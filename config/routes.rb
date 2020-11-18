@@ -3,5 +3,9 @@ Rails.application.routes.draw do
   root 'home#index'
 
   get 'home/index'
+  get 'home/signup'
+
   post 'home/login'
+
+  get 'home/search'
 end

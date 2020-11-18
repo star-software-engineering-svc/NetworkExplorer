@@ -1,15 +1,19 @@
-<form>
+
 <div class="row" style="margin: 0px;">
-  <div class="col-12">
-    <div class="login-form">
-      <div class="nt-input">
-        <input type="text" placeholder="Email"/>
+  <div class="col-36">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px;">Welcome Back</h1>
+    <form action="<%= home_login_path() %>" method="post">
+      <%= hidden_field_tag :authenticity_token, form_authenticity_token -%>
+      <div class="login-form">
+        <div class="nt-input">
+          <input type="text" placeholder="Email"/>
+        </div>
+        <div class="nt-input">
+          <input type="password" placeholder="Password"/>
+        </div>
+        <button type="submit" class="btn btn-danger w-100 mt-5">Login</button>
+        <p class="text-center mt-4 normal-font-weight">Don't have an account? <a href="<%= home_signup_path() %>" style="font-weight: 500;">Sign up</a></p>
       </div>
-      <div class="nt-input">
-        <input type="password" placeholder="Password"/>
-      </div>
-      <button type="button" class="btn btn-danger w-100">Login</button>
-    </div>
+    </form>
   </div>
 </div>
-</form>
