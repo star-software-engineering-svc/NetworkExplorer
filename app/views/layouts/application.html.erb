@@ -18,14 +18,58 @@
   <body>
     <div class="nt-container">
       <div class="nt-header">
+        <div class="clearfix" style="float:right; padding-top: 30px;">
+          <div class="nt-dropdown-group" style="display: inline;">
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
+              <span style="color: #193053;">Andrew</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="" href="javascript:void(0)">Log out</a>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="nt-body">
+      <div class="clearfix nt-body">
       <%= yield %>
       </div>
 
-      <div class="nt-footer">
+      <div class="clearfix nt-footer">
+        <div class="row" style="margin-left: 0px; margin-right: 0px;">
+          <div class="col-md-12 col-lg-10 offset-lg-1">
+            <div style="float:left;">
+              <div class="copyright">&copy;2020</div>
+            </div>
+            <div style="float:right;">
+              <a href="" class="footer-link">Terms</a>
+              <a href="" class="footer-link">Privacy Policy</a>
+              <a href="" class="footer-link">Support</a>
+              <a href="" class="footer-link">Contact Us</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <script>
+    $(document).ready(function() {
+      $(".dropdown-button").on("click", function(e) {
+        e.stopPropagation();
+        $(".nt-dropdown").hide();
+        $(this).siblings(".nt-dropdown").toggle();
+      });
+
+      $(".nt-dropdown > a").on("click", function() {
+        $(this).parents(".nt-dropdown").children("a").removeClass("opt-selected");
+        $(this).addClass("opt-selected");
+        $(this).parents(".nt-dropdown-group").children("button").children("span").html($(this).html());
+      });
+
+      $("body").on("click", function() {
+        $(".nt-dropdown").hide();
+      });
+    })
+    </script>
   </body>
 </html>

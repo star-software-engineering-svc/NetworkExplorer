@@ -2,6 +2,8 @@
 <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC82TqNKcy4RjJs-Pj-7Y-FK76RlUeEV5s&callback=initMap">
 </script>
 
+<script src="/js/echarts/echarts.min.js"></script>
+
 <div class="row" style="margin: 0px;">
   <div class="col-12">
     <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">Network Explorer</h1>
@@ -119,17 +121,17 @@
   </div>
 </div>
 
-<div class="row" style="margin-left: 0px; margin-right: 0px;">
-  <div class="col-sm-12 col-md-6 col-lg-5 offset-lg-1">
-    <div class="nt-panel mb-5" style="padding: 0px;">
+<div class="row" style="margin-left: 0px; margin-right: 0px; display:flex;">
+  <div class="col-sm-12 col-md-6 col-lg-5 offset-lg-1" style="display: flex; flex-direction: column;">
+    <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
       <div class="clearfix nt-panel-header">
         <div class="header-title" style="float: left;">
-          <h5 class="welcome-text mb-0">Domain</h5>
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Domain</h5>
         </div>
         <div class="header-tools" style="float: right">
           <div class="nt-dropdown-group" style="display: inline">
-            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px; color: #757575;">
-              <span>Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down"></i>
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
+              <span style="color: #193053;">Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
             </button>
             <div class="nt-dropdown" style="width: max-content; display: none;">
               <img class="caret" src="/images/caret.png"/>
@@ -181,18 +183,18 @@
       </div>
     </div>
   </div>
-  <div class="col-md-6 col-lg-5">
-    <div class="nt-panel mb-5" style="padding: 0px;">
+  <div class="col-md-6 col-lg-5" style="display: flex; flex-direction: column;">
+    <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
       <div class="clearfix nt-panel-header" style="border-bottom: 1px solid #e6e6e6d6;">
         <div class="header-title" style="float: left;">
-          <h5 class="welcome-text mb-0">Domain</h5>
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Domain</h5>
         </div>
         <div class="header-tools" style="float: right">
           <div class="nt-dropdown-group" style="display: inline">
-            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px; color: #757575;">
-              <span>Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down"></i>
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
+              <span style="color: #193053;">Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
             </button>
-            <div class="nt-dropdown" style="width: max-content; display: none;">
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;">
               <img class="caret" src="/images/caret.png"/>
               <a class="opt-selected" href="javascript:void(0)">Show: 10</a>
               <a class="" href="javascript:void(0)">Show: 100</a>
@@ -213,6 +215,7 @@
         </div>
       </div>
       <div class="nt-panel-body">
+        <div id="chart" style="width: 100%; height: 420px; background: red;"></div>
       </div>
     </div>
   </div>
@@ -220,6 +223,7 @@
 
 <script>
 let map;
+var myChart = echarts.init(document.getElementById('chart'));
 
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
@@ -229,20 +233,54 @@ function initMap() {
 }
 
 $(document).ready(function() {
-  $(".dropdown-button").on("click", function(e) {
-    e.stopPropagation();
-    $(".nt-dropdown").hide();
-    $(this).siblings(".nt-dropdown").toggle();
-  });
-
-  $(".nt-dropdown > a").on("click", function() {
-    $(this).parents(".nt-dropdown").children("a").removeClass("opt-selected");
-    $(this).addClass("opt-selected");
-    $(this).parents(".nt-dropdown-group").children("button").children("span").html($(this).html());
-  });
-
-  $("body").on("click", function() {
-    $(".nt-dropdown").hide();
-  });
+  myChart.showLoading();
+  $.getJSON('https://echarts.apache.org/examples/data/asset/data/npmdepgraph.min10.json', function (json) {
+    myChart.hideLoading();
+    myChart.setOption(option = {
+      title: {
+          text: 'NPM Dependencies'
+      },
+      animationDurationUpdate: 1500,
+      animationEasingUpdate: 'quinticInOut',
+      series : [
+        {
+          type: 'graph',
+          layout: 'none',
+          // progressiveThreshold: 700,
+          data: json.nodes.map(function (node) {
+            return {
+              x: node.x,
+              y: node.y,
+              id: node.id,
+              name: node.label,
+              symbolSize: node.size,
+              itemStyle: {
+                  color: node.color
+              }
+            };
+          }),
+          edges: json.edges.map(function (edge) {
+            return {
+              source: edge.sourceID,
+              target: edge.targetID
+            };
+          }),
+          emphasis: {
+            label: {
+              position: 'right',
+              show: true
+            }
+          },
+          roam: true,
+          focusNodeAdjacency: true,
+          lineStyle: {
+            width: 0.5,
+            curveness: 0,
+            opacity: 0.7
+          }
+        }
+      ]
+    }, true);
+  });  
 });
 </script>

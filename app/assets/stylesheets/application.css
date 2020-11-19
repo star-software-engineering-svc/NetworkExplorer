@@ -61,6 +61,7 @@ div.nt-footer {
     background: white;
     position: relative;
     box-shadow: rrgba(100, 100, 111, 0.01) 0px 1px 14px 1px;
+    padding-top: 20px;
 }
 
 div.nt-body {
@@ -292,4 +293,16 @@ div.nt-dropdown .caret {
     position: absolute;
     right: 0px;
     top: -5px;
+}
+
+.copyright {
+    font-weight: 300;
+    font-size: 14px;
+}
+
+a.footer-link {
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-left: 40px;
 }
