@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
   get 'home/index'
   get 'home/signup'
+  post 'home/signup'
 
   post 'home/login'
 
