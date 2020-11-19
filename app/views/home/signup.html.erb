@@ -2,17 +2,22 @@
 <div class="row" style="margin: 0px;">
   <div class="col-12">
     <h1 class="welcome-text text-center" style="margin: 70px 0px;">Welcome Back</h1>
-    <form action="<%= ENV["base_url"] %>/home/signup" method="post">
+    <form action="<%= home_signup_path() %>" method="post" autocomplete="off">
       <%= hidden_field_tag :authenticity_token, form_authenticity_token -%>
       <div class="login-form">
+        <% if @error %>
+          <div class="text-danger" role="alert">
+            <%= @error %>
+          </div>
+        <% end %>
         <div class="nt-input">
-          <input type="text" name="name" placeholder="Full name"/>
+          <input type="text" name="name" placeholder="Full name" autocomplete="off" value="<%=@name%>"/>
         </div>
         <div class="nt-input">
-          <input type="text" name="email" placeholder="Email"/>
+          <input type="text" name="email" placeholder="Email" autocomplete="off" value="<%=@email%>"/>
         </div>
         <div class="nt-input">
-          <input type="password" name="password" placeholder="Password"/>
+          <input type="password" name="password" placeholder="Password" autocomplete="false"/>
         </div>
         <button type="submit" class="btn btn-danger w-100 mt-5">Create Account</button>
         <p class="text-center mt-4 normal-font-weight">Already have an account? <a href="<%= home_index_path() %>" style="font-weight: 500;">Log in</a></p>

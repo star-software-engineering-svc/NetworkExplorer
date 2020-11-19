@@ -5,11 +5,16 @@
     <form action="<%= home_login_path() %>" method="post">
       <%= hidden_field_tag :authenticity_token, form_authenticity_token -%>
       <div class="login-form">
+        <% if @error %>
+          <div class="text-danger" role="alert">
+            <%= @error %>
+          </div>
+        <% end %>
         <div class="nt-input">
-          <input type="text" placeholder="Email"/>
+          <input type="text" name="email" placeholder="Email" autocomplete="off" value="<%=@email%>"/>
         </div>
         <div class="nt-input">
-          <input type="password" placeholder="Password"/>
+          <input type="password" name="password" placeholder="Password" autocomplete="false"/>
         </div>
         <button type="submit" class="btn btn-danger w-100 mt-5">Login</button>
         <p class="text-center mt-4 normal-font-weight">Don't have an account? <a href="<%= home_signup_path() %>" style="font-weight: 500;">Sign up</a></p>

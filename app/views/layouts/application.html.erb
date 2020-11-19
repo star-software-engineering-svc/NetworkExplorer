@@ -19,15 +19,17 @@
     <div class="nt-container">
       <div class="nt-header">
         <div class="clearfix" style="float:right; padding-top: 30px;">
+        <% if session[:username] %>
           <div class="nt-dropdown-group" style="display: inline;">
             <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
-              <span style="color: #193053;">Andrew</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
+              <span style="color: #193053;"><%=session[:username]%></span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
             </button>
-            <div class="nt-dropdown" style="width: max-content; display: none;">
+            <div class="nt-dropdown" style="width: max-content; display: none;" data-type="menu">
               <img class="caret" src="<%= ENV["base_url"] %>/images/caret.png"/>
-              <a class="" href="javascript:void(0)">Log out</a>
+              <a href="<%= home_logout_url() %>">Log out</a>
             </div>
           </div>
+        <% end %>
         </div>
       </div>
 
@@ -61,9 +63,13 @@
       });
 
       $(".nt-dropdown > a").on("click", function() {
-        $(this).parents(".nt-dropdown").children("a").removeClass("opt-selected");
-        $(this).addClass("opt-selected");
-        $(this).parents(".nt-dropdown-group").children("button").children("span").html($(this).html());
+        let type = $(this).parents(".nt-dropdown").data("type");
+
+        if(type != "menu") {
+          $(this).parents(".nt-dropdown").children("a").removeClass("opt-selected");
+          $(this).addClass("opt-selected");
+          $(this).parents(".nt-dropdown-group").children("button").children("span").html($(this).html());
+        }
       });
 
       $("body").on("click", function() {
