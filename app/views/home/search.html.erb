@@ -235,11 +235,11 @@ function initMap() {
 
 $(document).ready(function() {
   myChart.showLoading();
-  $.getJSON('https://echarts.apache.org/examples/data/asset/data/npmdepgraph.min10.json', function (json) {
+  $.getJSON('<%= ENV['base_url'] %>/data/chartdata.json', function (json) {
     myChart.hideLoading();
     myChart.setOption(option = {
       title: {
-          text: 'NPM Dependencies'
+          text: ''
       },
       animationDurationUpdate: 1500,
       animationEasingUpdate: 'quinticInOut',
@@ -254,9 +254,9 @@ $(document).ready(function() {
               y: node.y,
               id: node.id,
               name: node.label,
-              symbolSize: node.size,
+              symbolSize: 15,
               itemStyle: {
-                  color: node.color
+                  color: '#193053'
               }
             };
           }),

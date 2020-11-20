@@ -1,0 +1,93 @@
+{
+   "nodes":[
+      {
+         "color":"#4f19c7",
+         "label":"jquery",
+         "attributes":{
+            
+         },
+         "y":-404.26147,
+         "x":-739.36383,
+         "id":"jquery",
+         "size":4.7252817
+      },
+      {
+         "color":"#c71969",
+         "label":"jsdom",
+         "attributes":{
+            
+         },
+         "y":-862.7517,
+         "x":-134.2215,
+         "id":"jsdom",
+         "size":6.1554675
+      },
+      {
+         "color":"#c71969",
+         "label":"xmlhttprequest",
+         "attributes":{
+            
+         },
+         "y":-734.4221,
+         "x":-75.53079,
+         "id":"xmlhttprequest",
+         "size":100.0
+      },
+      {
+         "color":"#c71969",
+         "label":"htmlparser",
+         "attributes":{
+            
+         },
+         "y":624.50604,
+         "x":-818.97516,
+         "id":"htmlparser",
+         "size":0.67816025
+      },
+      {
+         "color":"#c71919",
+         "label":"contextify",
+         "attributes":{
+            
+         },
+         "y":120.37976,
+         "x":-710.59204,
+         "id":"contextify",
+         "size":19.818306
+      }
+   ],
+   "edges":[
+      {
+         "sourceID":"jquery",
+         "attributes":{
+            
+         },
+         "targetID":"jsdom",
+         "size":1
+      },
+      {
+         "sourceID":"jquery",
+         "attributes":{
+            
+         },
+         "targetID":"xmlhttprequest",
+         "size":1
+      },
+      {
+         "sourceID":"jquery",
+         "attributes":{
+            
+         },
+         "targetID":"htmlparser",
+         "size":1
+      },
+      {
+         "sourceID":"jquery",
+         "attributes":{
+            
+         },
+         "targetID":"contextify",
+         "size":1
+      }
+   ]
+}
