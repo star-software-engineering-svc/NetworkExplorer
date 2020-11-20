@@ -12,7 +12,7 @@
       <form method="get">
         <div class="row">
           <div class="col-8" style="padding: 0px;">
-            <input type="text" class="form-control" style="height: 46px;" name="query">
+            <input type="text" class="form-control" style="height: 46px;" name="query" value="<%= params[:query] %>">
           </div>
           <div class="col-4" style="padding: 0px 0px 0px 5px;">
             <button type="submit" class="btn btn-danger w-100">Explore</button>
@@ -22,6 +22,7 @@
     </div>
   </div>
 </div>
+<% if params[:query] %>
 <div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
   <div class="col-md-12 col-lg-10 offset-lg-1">
     <h5 class="welcome-text">WHOIS</h5>
@@ -30,55 +31,55 @@
         <div class="stats-cell">
           <div class="stats">
             <div>Netrange</div>
-            <div>180 M</div>
+            <div><%= @client_connections ? '180 M' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Cidr</div>
-            <div>324RTFG</div>
+            <div><%= @client_connections ? '324RTFG' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Name</div>
-            <div>TEL-DK-NT</div>
+            <div><%= @client_connections ? 'TEL-DK-NT' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Parent</div>
-            <div>456YHGB</div>
+            <div><%= @client_connections ? '456YHGB' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Net Type</div>
-            <div>12RTY7</div>
+            <div><%= @client_connections ? '12RTY7' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Origin As</div>
-            <div>TELECOM AS</div>
+            <div><%= @client_connections ? 'TELECOM AS' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Organization</div>
-            <div>TELECOM.NET</div>
+            <div><%= @client_connections ? 'TELECOM.NET' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Reg.Date</div>
-            <div>24.02.2017</div>
+            <div><%= @client_connections ? '24.02.2017' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Last Update</div>
-            <div>TODAY</div>
+            <div><%= @client_connections ? 'TODAY' : '-' %></div>
           </div>
         </div>
       </div>
@@ -215,7 +216,7 @@
         </div>
       </div>
       <div class="nt-panel-body">
-        <div id="chart" style="width: 100%; height: 420px; background: red;"></div>
+        <div id="chart" style="width: 100%; height: 420px;"></div>
       </div>
     </div>
   </div>
@@ -284,3 +285,5 @@ $(document).ready(function() {
   });  
 });
 </script>
+
+<% end %>

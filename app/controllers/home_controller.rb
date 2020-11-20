@@ -77,6 +77,11 @@ class HomeController < ApplicationController
         if session[:email] == nil
             redirect_to home_index_url() and return
         end
+
+        query = params[:query]
+        if ClientConnections.where(ipaddr: query).exists?
+            @client_connections = ClientConnections.where(ipaddr: query).first
+        end
     end
 
     def logout
