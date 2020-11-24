@@ -3,5 +3,5 @@ class HashedSitesSeen
 
     field :timestamp, type:Integer
     field :hashed_site, type:String
-    field :"servername", type:String
+    field :servername, type:String
 end
