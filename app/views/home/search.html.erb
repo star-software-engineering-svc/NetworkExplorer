@@ -31,55 +31,55 @@
         <div class="stats-cell">
           <div class="stats">
             <div>Netrange</div>
-            <div><%= @client_connections ? '180 M' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Cidr</div>
-            <div><%= @client_connections ? '324RTFG' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Name</div>
-            <div><%= @client_connections ? 'TEL-DK-NT' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Parent</div>
-            <div><%= @client_connections ? '456YHGB' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Net Type</div>
-            <div><%= @client_connections ? '12RTY7' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Origin As</div>
-            <div><%= @client_connections ? 'TELECOM AS' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Organization</div>
-            <div><%= @client_connections ? 'TELECOM.NET' : '-' %></div>
+            <div><%= @result ? @result.organization : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Reg.Date</div>
-            <div><%= @client_connections ? '24.02.2017' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
             <div>Last Update</div>
-            <div><%= @client_connections ? 'TODAY' : '-' %></div>
+            <div><%= @result ? '-' : '-' %></div>
           </div>
         </div>
       </div>
@@ -90,25 +90,25 @@
         <div class="col-sm-6 col-md-3">
           <div class="stats">
             <div>City</div>
-            <div>NEW YORK</div>
+            <div><%= @result ? @result[:city] : '-' %></div>
           </div>
         </div>
         <div class="col-sm-6 col-md-3">
           <div class="stats">
             <div>State</div>
-            <div>ny</div>
+            <div><%= @result ? @result[:state_prov] : '-' %></div>
           </div>
         </div>
         <div class="col-sm-6 col-md-3">
           <div class="stats">
             <div>Country</div>
-            <div>US</div>
+            <div><%= @result ? @result[:country_code2] : '-' %></div>
           </div>
         </div>
         <div class="col-sm-6 col-md-3">
           <div class="stats">
             <div>Long/Lat</div>
-            <div>58.38930, -101.52910</div>
+            <div><%= @result ? @result[:latitude] : '-' %>, <%= @result ? @result[:longitude] : '-' %></div>
           </div>
         </div>
       </div>
@@ -228,9 +228,18 @@ var myChart = echarts.init(document.getElementById('chart'));
 
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: -34.397, lng: 150.644 },
+    <% if @result %>
+    center: { lat: <%= @result[:latitude] %>, lng: <%= @result[:longitude] %> },
+    <% end %>
     zoom: 8,
   });
+
+  <% if @result %>
+  new google.maps.Marker({
+    position: { lat: <%= @result[:latitude] %>, lng: <%= @result[:longitude] %> },
+    map
+  })
+  <% end %>
 }
 
 $(document).ready(function() {

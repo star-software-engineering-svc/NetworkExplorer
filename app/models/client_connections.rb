@@ -6,5 +6,5 @@ class ClientConnections
     field :socket_num, type:Integer
     field :ipaddr, type:String
     field :conn_num, type:Integer
-    field :"servername", type:String
+    field :servername, type:String
 end

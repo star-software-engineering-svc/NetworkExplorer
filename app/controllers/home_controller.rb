@@ -78,9 +78,10 @@ class HomeController < ApplicationController
             redirect_to home_index_url() and return
         end
 
-        query = params[:query]
-        if ClientConnections.where(ipaddr: query).exists?
-            @client_connections = ClientConnections.where(ipaddr: query).first
+        @query = params[:query]
+        @exists = GeoipInfo.where(ip: @query).exists?
+        if @exists
+            @result = GeoipInfo.where(ip: @query).first
         end
     end
 
