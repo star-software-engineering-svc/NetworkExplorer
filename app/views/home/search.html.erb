@@ -1,7 +1,4 @@
 
-<script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC82TqNKcy4RjJs-Pj-7Y-FK76RlUeEV5s&callback=initMap">
-</script>
-
 <script src="/js/echarts/echarts.min.js"></script>
 
 <div class="row" style="margin: 0px;">
@@ -223,24 +220,39 @@
 </div>
 
 <script>
-let map;
+var map;
 var myChart = echarts.init(document.getElementById('chart'));
 
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    <% if @result %>
-    center: { lat: <%= @result[:latitude] %>, lng: <%= @result[:longitude] %> },
-    <% end %>
-    zoom: 8,
-  });
+const iconFeature = new ol.Feature({
+  geometry: new ol.geom.Point(ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>])),
+  name: 'Somewhere near Nottingham',
+});
 
-  <% if @result %>
-  new google.maps.Marker({
-    position: { lat: <%= @result[:latitude] %>, lng: <%= @result[:longitude] %> },
-    map
+map = new ol.Map({
+  target: 'map',
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM(),
+    }),
+    new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [iconFeature]
+      }),
+      style: new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 32],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          src: '<%= ENV['base_url'] %>/images/map-marker-32.png'
+        })
+      })
+    })
+  ],
+  view: new ol.View({
+    center: ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>]),
+    zoom: 8
   })
-  <% end %>
-}
+});
 
 $(document).ready(function() {
   myChart.showLoading();
