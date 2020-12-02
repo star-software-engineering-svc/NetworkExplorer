@@ -11,7 +11,11 @@
         <% end %>
         <label>Name</label>
         <div class="nt-input">
-          <input type="text" name="name" placeholder="Name" autocomplete="off" value="<%=session[:username]%>"/>
+          <input type="text" name="name" placeholder="Name" autocomplete="off" value="<%=session[:name]%>"/>
+        </div>
+        <label>Email</label>
+        <div class="nt-input">
+          <%=session[:email]%>
         </div>
         <!-- for disalbe autocomplete -->
         <input type="password" name="fakepassword" style="display:none"/>
@@ -28,7 +32,7 @@
         <div class="nt-input">
           <input type="password" name="repassword" placeholder="" autocomplete="false" value=""/>
         </div>
-        <button type="submit" class="btn btn-danger w-100 mt-1">Update</button>
+        <button type="submit" class="btn btn-danger w-100">Update</button>
       </div>
     </form>
   </div>

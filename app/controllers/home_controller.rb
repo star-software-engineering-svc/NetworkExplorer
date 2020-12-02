@@ -30,7 +30,7 @@ class HomeController < ApplicationController
 
             if @user.password == Digest::MD5.hexdigest(@password)
                 session[:_id] = @user[:_id]
-                session[:username] = @user[:name]
+                session[:name] = @user[:name]
                 session[:email] = @user[:email]
                 session[:is_admin] = @user[:is_admin]
                 redirect_to home_search_url() and return
@@ -150,5 +150,52 @@ class HomeController < ApplicationController
     end
 
     def updateProfile
+        id = session[:_id]["$oid"]
+        name = params[:name]
+        current_password = params[:current_password]
+        email = params[:name]
+        password = params[:password]
+        repassword = params[:repassword]
+
+        if name == ""
+            @error = "The name is the required field."
+            render "profile"
+            return
+        end
+
+        if current_password == ""
+            @error = "Please input the current password."
+            render "profile"
+            return
+        end
+
+        if password == ""
+            @error = "Please input the new password."
+            render "profile"
+            return
+        end
+
+        if password != repassword
+            @error = "Please confirm the new password."
+            render "profile"
+            return
+        end
+
+        user = User.find_by(_id: id)
+
+        if user.password != Digest::MD5.hexdigest(current_password)
+            @error = "The current password is not correct."
+            render "profile"
+            return
+        end
+
+        user.name = name
+        user.password = Digest::MD5.hexdigest(password)
+        user.save
+
+        session[:name] = name
+
+        render "profile"
+        return
     end
 end

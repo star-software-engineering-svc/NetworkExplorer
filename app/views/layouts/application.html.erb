@@ -33,10 +33,10 @@
             <% end %>
         </div>
         <div class="clearfix" style="float:right; padding-top: 30px;">
-        <% if session[:username] %>
+        <% if session[:name] %>
           <div class="nt-dropdown-group" style="display: inline;">
             <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
-              <span style="color: #193053;"><%=session[:username]%></span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
+              <span style="color: #193053;"><%=session[:name]%></span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
             </button>
             <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;" data-type="menu">
               <img class="caret" src="<%= ENV["base_url"] %>/images/caret.png"/>
