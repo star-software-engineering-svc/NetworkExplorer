@@ -10,4 +10,10 @@ Rails.application.routes.draw do
   post 'home/login'
 
   get 'home/search'
+  get 'home/users'
+  get 'home/getUsers'
+  post 'home/activateUser'
+
+  get 'home/profile'
+  post 'home/updateProfile'
 end

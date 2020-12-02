@@ -5,28 +5,43 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <link rel="stylesheet" href="<%= ENV["base_url"] %>/assets/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%= ENV["base_url"] %>/plugins/bootstrap-4.3.1-dist/css/bootstrap.min.css">
 
-    <script src="<%= ENV["base_url"] %>/assets/jquery/jquery.min.js"></script>
-    <script src="<%= ENV["base_url"] %>/assets/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<%= ENV["base_url"] %>/plugins/jquery/jquery.min.js"></script>
+    <script src="<%= ENV["base_url"] %>/plugins/bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"></script>
 
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     
-    <link rel="stylesheet" href="<%= ENV["base_url"] %>/assets/fontawesome-free-5.15.1-web/css/all.min.css">
+    <link rel="stylesheet" href="<%= ENV["base_url"] %>/plugins/fontawesome-free-5.15.1-web/css/all.min.css">
+
+    <link rel="stylesheet" type="text/css" href="<%= ENV["base_url"] %>/plugins/DataTables/dataTables.min.css"/>
+    <script type="text/javascript" src="<%= ENV["base_url"] %>/plugins/DataTables/dataTables.min.js"></script>
   </head>
 
   <body>
     <div class="nt-container">
       <div class="nt-header">
+        <div class="clearfix" style="float: left; padding-top: 30px;">
+            <a class="btn btn-link" style="font-size: 13px; padding: 10px 20px;" href="<%= ENV["base_url"]%>/home/search">
+              <span style="color: #193053;">Explore</span>
+            </a>
+            <% if session[:is_admin] %>
+            <a class="btn btn-link" style="font-size: 13px; padding: 10px 20px;" href="<%= ENV["base_url"]%>/home/users">
+              <span style="color: #193053;">Users</span>
+            </a>
+            <% end %>
+        </div>
         <div class="clearfix" style="float:right; padding-top: 30px;">
         <% if session[:username] %>
           <div class="nt-dropdown-group" style="display: inline;">
             <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
               <span style="color: #193053;"><%=session[:username]%></span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
             </button>
-            <div class="nt-dropdown" style="width: max-content; display: none;" data-type="menu">
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;" data-type="menu">
               <img class="caret" src="<%= ENV["base_url"] %>/images/caret.png"/>
+              <a href="<%= home_profile_url() %>">My Profile</a>
+              <hr style="margin: 2px -10px;"/>
               <a href="<%= home_logout_url() %>">Log out</a>
             </div>
           </div>

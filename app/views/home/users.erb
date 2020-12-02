@@ -1,0 +1,76 @@
+<div class="row" style="margin: 0px;">
+  <div class="col-12">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">Manage Users</h1>
+  </div>
+</div>
+<div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <table id="table_users" class="table">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Admin?</th>
+          <th>Verified?</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  var table = $("#table_users").DataTable({
+    "processing": true,
+    "serverSide": true,
+    "ajax": "<%= ENV["base_url"] %>/home/getUsers",
+    "columns": [
+      {"data" : "no"},
+      {"data" : "name"},
+      {"data" : "email"},
+      {"data" : "is_admin", render: function(data) {
+        return (data ? '<span class="badge badge-success">YES</span>' : '<span class="badge badge-secondary">NO</span>');
+      }},
+      {"data" : "is_verified", render: function(data) {
+        return (data ? '<span class="badge badge-success">YES</span>' : '<span class="badge badge-danger">NO</span>');
+      }},
+      {"data" : "_id.$oid", render: function(data, type, row) {
+        return (row.is_verified ? '<button name="deactivate" type="button" class="btn btn-danger btn-sm" data-oid="' + data + '" style="padding: .25rem .5rem;">Deactivate</button>' : '<button name="activate" type="button" class="btn btn-success btn-sm" data-oid="' + data + '">Activate</button>');
+      }}
+    ]
+  });
+
+  function activateUser(oid, flag)
+  {
+    var token = $('meta[name=csrf-token]').attr('content');
+    var data = { _id: oid, flag: flag }
+
+    $.ajax({
+      url: '<%= ENV["base_url"] %>/home/activateUser',
+      type: 'POST',
+      headers: {
+        'X-CSRF-Token': token
+      },
+      data: data,
+      success: function(response) {
+        console.log(response);
+        table.ajax.reload(null, false);
+      }
+    });
+  }
+
+  $("body").on("click", "[name=deactivate]", function() {
+    console.log($(this).data("oid"));
+    activateUser($(this).data("oid"), 0);
+  });
+
+  $("body").on("click", "[name=activate]", function() {
+    console.log($(this).data("oid"));
+    activateUser($(this).data("oid"), 1);
+  });
+});
+</script>

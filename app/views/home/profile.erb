@@ -1,0 +1,35 @@
+<div class="row" style="margin: 0px;">
+  <div class="col-12">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">My Profile</h1>
+    <form action="<%= home_updateProfile_path() %>" method="post" autocomplete="off">
+      <%= hidden_field_tag :authenticity_token, form_authenticity_token -%>
+      <div class="login-form">
+        <% if @error %>
+          <div class="text-danger" role="alert">
+            <%= @error %>
+          </div>
+        <% end %>
+        <label>Name</label>
+        <div class="nt-input">
+          <input type="text" name="name" placeholder="Name" autocomplete="off" value="<%=session[:username]%>"/>
+        </div>
+        <!-- for disalbe autocomplete -->
+        <input type="password" name="fakepassword" style="display:none"/>
+        <hr/>
+        <label>Current Password</label>
+        <div class="nt-input">
+          <input type="password" name="current_password" placeholder="" autocomplete="new-password" value=""/>
+        </div>
+        <label>New Password</label>
+        <div class="nt-input">
+          <input type="password" name="password" placeholder="" autocomplete="false" value=""/>
+        </div>
+        <label>Confirm Password</label>
+        <div class="nt-input">
+          <input type="password" name="repassword" placeholder="" autocomplete="false" value=""/>
+        </div>
+        <button type="submit" class="btn btn-danger w-100 mt-1">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
