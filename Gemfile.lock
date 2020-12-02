@@ -82,6 +82,7 @@ GEM
       activesupport (>= 4.2.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
+    ipaddress (0.8.3)
     jbuilder (2.10.1)
       activesupport (>= 5.0.0)
     listen (3.3.1)
@@ -208,6 +209,7 @@ DEPENDENCIES
   bson_ext
   byebug
   capybara (>= 2.15)
+  ipaddress
   jbuilder (~> 2.7)
   listen (~> 3.2)
   mongoid (~> 7.0.5)

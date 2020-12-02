@@ -90,9 +90,14 @@ class HomeController < ApplicationController
         end
 
         @query = params[:query]
-        @exists = GeoipInfo.where(ip: @query).exists?
-        if @exists
-            @result = GeoipInfo.where(ip: @query).first
+
+        @valid = IPAddress.valid? @query
+
+        if @valid
+            @exists = GeoipInfo.where(ip: @query).exists?
+            if @exists
+                @result = GeoipInfo.where(ip: @query).first
+            end
         end
     end
 
@@ -102,9 +107,27 @@ class HomeController < ApplicationController
     end
 
     def users
+        id = session[:_id]["$oid"]
+        user = User.find_by(_id: id)
+
+        if not user.is_admin
+            render 'accessdenied'
+            return
+        end
     end
 
     def getUsers
+        id = session[:_id]["$oid"]
+        user = User.find_by(_id: id)
+
+        if not user.is_admin
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+        
         search = params[:search]
         search_value = search[:value]
         start = params[:start]
@@ -127,6 +150,18 @@ class HomeController < ApplicationController
     end
 
     def activateUser
+        
+        myid = session[:_id]["$oid"]
+        me = User.find_by(_id: myid)
+
+        if not me.is_admin
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+
         id = params[:_id]
         flag = params[:flag]
 
