@@ -27,56 +27,62 @@
       <div class="w-100" style="margin: 0px; padding: 0px;">
         <div class="stats-cell">
           <div class="stats">
-            <div>Netrange</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>IP</div>
+            <div><%= @result ? @result[:ip] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Cidr</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>ISP</div>
+            <div><%= @result ? @result[:isp] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Name</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>ASN</div>
+            <div><%= @result ? @result[:asn] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Parent</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>Threat Score</div>
+            <div><%= @result ? @result[:security][:threat_score] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Net Type</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>Tor</div>
+            <div><%= @result ? @result[:security][:is_tor] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Origin As</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>Proxy</div>
+            <div><%= @result ? @result[:security][:is_proxy] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Organization</div>
-            <div><%= @result ? @result.organization : '-' %></div>
+            <div>Proxy Type</div>
+            <div><%= @result ? @result[:security][:proxy_type] : '-' %>&nbsp;</div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Reg.Date</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>Anonymous</div>
+            <div><%= @result ? @result[:security][:is_anonymous] : '-' %></div>
           </div>
         </div><!--
         --><div class="stats-cell">
           <div class="stats">
-            <div>Last Update</div>
-            <div><%= @result ? '-' : '-' %></div>
+            <div>Known Attacker</div>
+            <div><%= @result ? @result[:security][:is_known_attacker] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Cloud Provider</div>
+            <div><%= @result ? @result[:security][:is_cloud_provider] : '-' %></div>
           </div>
         </div>
       </div>
@@ -84,25 +90,37 @@
     <h5 class="welcome-text mt-4">GEOIP</h5>
     <div class="nt-panel">
       <div class="row no-gutters">
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>District</div>
+            <div><%= @result ? @result[:district] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
           <div class="stats">
             <div>City</div>
             <div><%= @result ? @result[:city] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-6 col-md-2">
           <div class="stats">
             <div>State</div>
             <div><%= @result ? @result[:state_prov] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-6 col-md-2">
           <div class="stats">
             <div>Country</div>
             <div><%= @result ? @result[:country_code2] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-3">
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>Zipcode</div>
+            <div><%= @result ? @result[:zipcode] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
           <div class="stats">
             <div>Long/Lat</div>
             <div><%= @result ? @result[:latitude] : '-' %>, <%= @result ? @result[:longitude] : '-' %></div>

@@ -168,25 +168,25 @@ div.nt-panel-header {
 
 @media (min-width: 576px) {
     .stats-cell {
-        width: 33%;
+        width: 20%;
     }
 }
 
 @media (min-width: 768px) {
     .stats-cell {
-        width: 33%;
+        width: 20%;
     }
 }
 
 @media (min-width: 992px) {
     .stats-cell {
-        width: 11%;
+        width: 20%;
     }
 }
 
 @media (min-width: 1200px) {
     .stats-cell {
-        width: 11%;
+        width: 10%;
     }
 }
 

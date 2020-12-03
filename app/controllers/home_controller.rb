@@ -94,9 +94,29 @@ class HomeController < ApplicationController
         @valid = IPAddress.valid? @query
 
         if @valid
-            @exists = GeoipInfo.where(ip: @query).exists?
-            if @exists
-                @result = GeoipInfo.where(ip: @query).first
+
+            @aggResult = ClientConnections.collection.aggregate([
+                { '$match' =>
+                    { 'ipaddr' => @query }
+                }, 
+                {
+                    '$lookup' => {
+                        'from' => 'hashed_sites_seens',
+                        'localField' => 'timestamp',
+                        'foreignField' => 'timestamp',
+                        'as' => 'matched_timestamp'
+                    }
+                }, 
+                {
+                    '$sort' => { 'timestamp' => 1 }
+                }
+            ]).count
+
+            if @aggResult > 0
+                @exists = GeoipInfo.where(ip: @query).exists?
+                if @exists
+                    @result = GeoipInfo.where(ip: @query).first
+                end
             end
         end
     end
