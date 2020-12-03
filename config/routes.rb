@@ -16,4 +16,6 @@ Rails.application.routes.draw do
 
   get 'home/profile'
   post 'home/updateProfile'
+
+  get 'home/getConnections'
 end

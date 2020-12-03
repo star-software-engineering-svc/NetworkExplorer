@@ -306,3 +306,7 @@ a.footer-link {
     text-decoration: none;
     margin-left: 40px;
 }
+
+.text-right {
+    text-align: right;
+}

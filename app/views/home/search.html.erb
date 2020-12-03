@@ -142,7 +142,7 @@
     <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
       <div class="clearfix nt-panel-header">
         <div class="header-title" style="float: left;">
-          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Domain</h5>
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Connections</h5>
         </div>
         <div class="header-tools" style="float: right">
           <div class="nt-dropdown-group" style="display: inline">
@@ -169,31 +169,16 @@
           </div>
         </div>
       </div>
-      <div class="nt-panel-body" style="margin: 0px 20px 20px 20px; overflow: auto;">
+      <div class="nt-panel-body" style="margin: 0px 20px 20px 20px; overflow: auto; height: 400px;">
         <table class="domain-table">
           <thead>
             <tr>
-              <th>DOMAIN NAME</th>
-              <th># REQUESTS</th>
-              <th>LAST CHECK</th>
+              <th>&nbsp;Site</th>
+              <th class="text-center"># REQUESTS</th>
+              <th class="text-right">SEEN&nbsp;</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="table-text">jqoeugnvmapqurnz</td>
-              <td class="table-text">24</td>
-              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
-            </tr>
-            <tr>
-              <td class="table-text">jqoeugnvmapqurnz</td>
-              <td class="table-text">24</td>
-              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
-            </tr>
-            <tr>
-              <td class="table-text">jqoeugnvmapqurnz</td>
-              <td class="table-text">24</td>
-              <td class="table-text">19th Feburary 2019 - 3:58pm</td>
-            </tr>
+          <tbody id="connections_body">
           </tbody>
         </table>
       </div>
@@ -203,7 +188,7 @@
     <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
       <div class="clearfix nt-panel-header" style="border-bottom: 1px solid #e6e6e6d6;">
         <div class="header-title" style="float: left;">
-          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Domain</h5>
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Graph of Connections</h5>
         </div>
         <div class="header-tools" style="float: right">
           <div class="nt-dropdown-group" style="display: inline">
@@ -231,7 +216,7 @@
         </div>
       </div>
       <div class="nt-panel-body">
-        <div id="chart" style="width: 100%; height: 420px;"></div>
+        <div id="chart" style="width: 100%; height: 400px;"></div>
       </div>
     </div>
   </div>
@@ -272,7 +257,31 @@ map = new ol.Map({
   })
 });
 
+function loadConnections(length)
+{
+  $.getJSON('<%= ENV['base_url'] %>/home/getConnections?length=' + length + '&query=<%=params[:query]%>', function(json) {
+    $("#connections_body").empty();
+    if(json.result.length > 0) {
+      for(var i in json.result) {
+        let o = json.result[i]
+        let html = [
+          '<tr>',
+            '<td class="table-text">', o['servername'], '</td>',
+            '<td class="table-text text-center">', o['conn_num'], '</td>',
+            '<td class="table-text text-right">', moment.unix(parseInt(o['timestamp'])/1000).format("Do MMMM YYYY - h:m a"), '</td>',
+          '</tr>'].join('');
+        $(html).appendTo("#connections_body");
+      }
+    } else {
+      $("#connections_body").html('<tr><td colspan="3">No data</td></tr>');
+    }
+  })
+}
+
 $(document).ready(function() {
+
+  loadConnections(10);
+
   myChart.showLoading();
   $.getJSON('<%= ENV['base_url'] %>/data/chartdata.json', function (json) {
     myChart.hideLoading();

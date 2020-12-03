@@ -121,6 +121,18 @@ class HomeController < ApplicationController
         end
     end
 
+    def getConnections
+        @query = params[:query]
+        length = params[:length]
+
+        result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+
+        respond_to do |format|
+            msg = { :result => result }
+            format.json  { render :json => msg }
+        end
+    end
+
     def logout
         reset_session
         redirect_to home_index_url() and return
