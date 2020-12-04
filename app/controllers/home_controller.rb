@@ -117,6 +117,20 @@ class HomeController < ApplicationController
                 @exists = GeoipInfo.where(ip: @query).exists?
                 if @exists
                     @result = GeoipInfo.where(ip: @query).first
+                    @connCount = ClientConnections.where(ipaddr: @query).count
+                    @graphCount = ClientConnections.collection.aggregate([
+                        {
+                            '$match' => { 'ipaddr' => @query }
+                        }, 
+                        {
+                            "$group" => { 
+                                '_id' => "$servername",
+                                'count' => { '$sum' => 1 },
+                                "servername" => { "$first" => "$servername" }, 
+                                "conn_num" => { '$sum' => "$conn_num" } 
+                            }
+                        }
+                    ]).count
                 end
             end
         end

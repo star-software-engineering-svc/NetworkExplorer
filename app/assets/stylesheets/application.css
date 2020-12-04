@@ -310,3 +310,9 @@ a.footer-link {
 .text-right {
     text-align: right;
 }
+
+.total-conn {
+    font-size: 14px;
+    color: #193053;
+    padding: 10px 25px;
+}
