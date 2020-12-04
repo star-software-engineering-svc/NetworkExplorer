@@ -151,9 +151,9 @@
             </button>
             <div class="nt-dropdown" style="width: max-content; display: none;">
               <img class="caret" src="/images/caret.png"/>
-              <a class="opt-selected" href="javascript:void(0)">Show: 10</a>
-              <a class="" href="javascript:void(0)">Show: 100</a>
-              <a class="" href="javascript:void(0)">Show: 1000</a>
+              <a class="opt-selected" href="javascript:loadConnections(10)">Show: 10</a>
+              <a class="" href="javascript:loadConnections(100)">Show: 100</a>
+              <a class="" href="javascript:loadConnections(1000)">Show: 1000</a>
             </div>
           </div>
 
@@ -197,9 +197,9 @@
             </button>
             <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;">
               <img class="caret" src="/images/caret.png"/>
-              <a class="opt-selected" href="javascript:void(0)">Show: 10</a>
-              <a class="" href="javascript:void(0)">Show: 100</a>
-              <a class="" href="javascript:void(0)">Show: 1000</a>
+              <a class="opt-selected" href="javascript:loadConnectionsGraph(10)">Show: 10</a>
+              <a class="" href="javascript:loadConnectionsGraph(100)">Show: 100</a>
+              <a class="" href="javascript:loadConnectionsGraph(1000)">Show: 1000</a>
             </div>
           </div>
           
@@ -278,12 +278,10 @@ function loadConnections(length)
   })
 }
 
-$(document).ready(function() {
-
-  loadConnections(10);
-
-  myChart.showLoading();
-  $.getJSON('<%= ENV['base_url'] %>/data/chartdata.json', function (json) {
+function loadConnectionsGraph(length)
+{
+  // myChart.showLoading();
+  $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
     myChart.hideLoading();
     myChart.setOption(option = {
       title: {
@@ -291,6 +289,9 @@ $(document).ready(function() {
       },
       animationDurationUpdate: 1500,
       animationEasingUpdate: 'quinticInOut',
+      tooltip: {
+        trigger: 'item'
+      },
       series : [
         {
           type: 'graph',
@@ -302,12 +303,14 @@ $(document).ready(function() {
               y: node.y,
               id: node.id,
               name: node.label,
-              symbolSize: 15,
+              value: node.conn_num,
+              symbolSize: node.size,
               itemStyle: {
-                  color: '#193053'
-              }
+                  color: node.color
+              },
             };
           }),
+          center: [0, 0],
           edges: json.edges.map(function (edge) {
             return {
               source: edge.sourceID,
@@ -320,8 +323,12 @@ $(document).ready(function() {
               show: true
             }
           },
+          label: {
+            position: 'right',
+            show: true
+          },
           roam: true,
-          focusNodeAdjacency: true,
+          focusNodeAdjacency: false,
           lineStyle: {
             width: 0.5,
             curveness: 0,
@@ -330,7 +337,13 @@ $(document).ready(function() {
         }
       ]
     }, true);
-  });  
+  });
+}
+
+$(document).ready(function() {
+
+  loadConnections(10);
+  loadConnectionsGraph(10);
 });
 </script>
 

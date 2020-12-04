@@ -133,6 +133,53 @@ class HomeController < ApplicationController
         end
     end
 
+    def getConnectionsGraph
+        @query = params[:query]
+        length = params[:length]
+
+        connections = ClientConnections.collection.aggregate([
+            {
+                '$match' => { 'ipaddr' => @query }
+            }, 
+            {
+                "$group" => { 
+                    '_id' => "$servername",
+                    'count' => { '$sum' => 1 },
+                    "servername" => { "$first" => "$servername" }, 
+                    "conn_num" => { '$sum' => "$conn_num" } 
+                }
+            }
+        ])
+
+        nodes = []
+        nodes << {:id => @query, :label => @query, :color => '#ee5149', :x => 0, :y => 0, :size => 10}
+
+        edges = []
+
+        connections.each do |p|
+            size = p[:conn_num]
+            if size < 100
+                size = 5
+            elsif size < 1000
+                size = 10
+            elsif size < 5000
+                size = 15
+            elsif size < 10000
+                size = 20
+            else
+                size = 30
+            end
+
+            nodes << {:id => p[:_id], :label => p[:_id], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
+            edges << {:sourceID => @query, :targetID => p[:_id], :size => 1}
+        end
+
+        respond_to do |format|
+            msg = { :nodes => nodes, :edges => edges }
+            format.json  { render :json => msg }
+        end
+    end
+
     def logout
         reset_session
         redirect_to home_index_url() and return

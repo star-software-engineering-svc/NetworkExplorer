@@ -18,4 +18,5 @@ Rails.application.routes.draw do
   post 'home/updateProfile'
 
   get 'home/getConnections'
+  get 'home/getConnectionsGraph'
 end
