@@ -372,7 +372,7 @@ $(document).ready(function() {
 });
 </script>
 
-<% elsif params[:query] != '' and @errorMsg  %>
+<% elsif params[:query] and params[:query] != '' and @errorMsg  %>
 <div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
   <div class="col-md-12 col-lg-10 offset-lg-1">
     <div class="alert alert-warning" role="alert">
