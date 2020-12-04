@@ -19,4 +19,6 @@ Rails.application.routes.draw do
 
   get 'home/getConnections'
   get 'home/getConnectionsGraph'
+  get 'home/exportConnections'
+  get 'home/exportConnectionsGraph'
 end

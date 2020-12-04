@@ -1,3 +1,4 @@
+require 'csv'
 class HomeController < ApplicationController
     def index
     end
@@ -133,6 +134,32 @@ class HomeController < ApplicationController
         end
     end
 
+    def to_conn_csv(result)
+        attributes = %w{servername conn_num timestamp} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << attributes.map{ |attr| conn.send(attr) }
+            end
+        end
+    end
+
+    def exportConnections
+        @query = params[:query]
+        length = params[:length]
+
+        result = []
+        if length.to_i > 0
+            result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        else
+            result = ClientConnections.where(ipaddr: @query)
+        end
+
+        send_data self.to_conn_csv(result), filename: "connections-#{Date.today}.csv"
+    end
+
     def getConnectionsGraph
         @query = params[:query]
         length = params[:length]
@@ -181,6 +208,59 @@ class HomeController < ApplicationController
             msg = { :nodes => nodes, :edges => edges }
             format.json  { render :json => msg }
         end
+    end
+
+    def to_conn_graph_csv(result)
+        attributes = %w{servername conn_num count} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << [conn[:servername], conn[:conn_num], conn[:count]]
+            end
+        end
+    end
+
+    def exportConnectionsGraph
+        @query = params[:query]
+        length = params[:length]
+
+        result = []
+        if length.to_i > 0
+            connections = ClientConnections.collection.aggregate([
+            {
+                '$match' => { 'ipaddr' => @query }
+            }, 
+            {
+                "$group" => { 
+                    '_id' => "$servername",
+                    'count' => { '$sum' => 1 },
+                    "servername" => { "$first" => "$servername" }, 
+                    "conn_num" => { '$sum' => "$conn_num" } 
+                }
+            },
+            {
+                "$limit" => length.to_i
+            }
+        ])
+        else
+            connections = ClientConnections.collection.aggregate([
+                {
+                    '$match' => { 'ipaddr' => @query }
+                }, 
+                {
+                    "$group" => { 
+                        '_id' => "$servername",
+                        'count' => { '$sum' => 1 },
+                        "servername" => { "$first" => "$servername" }, 
+                        "conn_num" => { '$sum' => "$conn_num" } 
+                    }
+                },
+            ])
+        end
+
+        send_data self.to_conn_graph_csv(connections), filename: "connections-graph-#{Date.today}.csv"
     end
 
     def logout

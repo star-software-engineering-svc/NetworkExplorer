@@ -161,10 +161,10 @@
             <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
               <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
             </button>
-            <div class="nt-dropdown" style="width: max-content; display: none;">
+            <div class="nt-dropdown" style="width: max-content; display: none;" data-type="menu">
               <img class="caret" src="/images/caret.png"/>
-              <a class="opt-selected" href="javascript:void(0)">Export</a>
-              <a class="" href="javascript:void(0)">Export all</a>
+              <a class="" href="javascript:exportConnections()">Export</a>
+              <a class="" href="javascript:exportConnectionsAll()">Export all</a>
             </div>
           </div>
         </div>
@@ -207,10 +207,10 @@
             <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
               <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
             </button>
-            <div class="nt-dropdown" style="width: max-content; display: none;">
+            <div class="nt-dropdown" style="width: max-content; display: none;" data-type="menu">
               <img class="caret" src="/images/caret.png"/>
-              <a class="opt-selected" href="javascript:void(0)">Export</a>
-              <a class="" href="javascript:void(0)">Export all</a>
+              <a class="" href="javascript:exportConnectionGraph()">Export</a>
+              <a class="" href="javascript:exportConnectionGraphAll(0)">Export all</a>
             </div>
           </div>
         </div>
@@ -257,8 +257,10 @@ map = new ol.Map({
   })
 });
 
+var connectionLength = 10, graphLength = 10;
 function loadConnections(length)
 {
+  connectionLength = length;
   $.getJSON('<%= ENV['base_url'] %>/home/getConnections?length=' + length + '&query=<%=params[:query]%>', function(json) {
     $("#connections_body").empty();
     if(json.result.length > 0) {
@@ -280,6 +282,7 @@ function loadConnections(length)
 
 function loadConnectionsGraph(length)
 {
+  graphLength = length;
   // myChart.showLoading();
   $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
     myChart.hideLoading();
@@ -338,6 +341,26 @@ function loadConnectionsGraph(length)
       ]
     }, true);
   });
+}
+
+function exportConnections()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnections?length=' + connectionLength + '&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionsAll()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnections?length=-1&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionGraph()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnectionsGraph?length=' + graphLength + '&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionGraphAll()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnectionsGraph?length=-1&query=<%=params[:query]%>', '_blank');
 }
 
 $(document).ready(function() {
