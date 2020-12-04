@@ -19,7 +19,7 @@
     </div>
   </div>
 </div>
-<% if params[:query] and @valid and @result %>
+<% if params[:query] and not @errorMsg %>
 <div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
   <div class="col-md-12 col-lg-10 offset-lg-1">
     <h5 class="welcome-text">WHOIS</h5>
@@ -372,19 +372,11 @@ $(document).ready(function() {
 });
 </script>
 
-<% elsif params[:query] and @valid == false %>
+<% elsif params[:query] != '' and @errorMsg  %>
 <div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
   <div class="col-md-12 col-lg-10 offset-lg-1">
     <div class="alert alert-warning" role="alert">
-      The ip address is not valid.
-    </div>
-  </div>
-</div>
-<% elsif params[:query] and (not @result)  %>
-<div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
-  <div class="col-md-12 col-lg-10 offset-lg-1">
-    <div class="alert alert-warning" role="alert">
-      No result.
+      <%=@errorMsg%>
     </div>
   </div>
 </div>

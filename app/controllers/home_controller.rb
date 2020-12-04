@@ -131,8 +131,14 @@ class HomeController < ApplicationController
                             }
                         }
                     ]).count
+                else
+                    @errorMsg = "No results found."
                 end
+            else
+                @errorMsg = "No results found."
             end
+        else
+            @errorMsg = "The ip address is not valid."
         end
     end
 
