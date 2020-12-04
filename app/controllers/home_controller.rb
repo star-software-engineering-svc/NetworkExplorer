@@ -148,6 +148,9 @@ class HomeController < ApplicationController
                     "servername" => { "$first" => "$servername" }, 
                     "conn_num" => { '$sum' => "$conn_num" } 
                 }
+            },
+            {
+                "$limit" => length.to_i
             }
         ])
 
