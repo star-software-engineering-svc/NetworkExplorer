@@ -143,6 +143,14 @@ class HomeController < ApplicationController
     end
 
     def getConnections
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+
         @query = params[:query]
         length = params[:length]
 
@@ -167,6 +175,10 @@ class HomeController < ApplicationController
     end
 
     def exportConnections
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         @query = params[:query]
         length = params[:length]
 
@@ -181,6 +193,14 @@ class HomeController < ApplicationController
     end
 
     def getConnectionsGraph
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+        
         @query = params[:query]
         length = params[:length]
 
@@ -243,6 +263,10 @@ class HomeController < ApplicationController
     end
 
     def exportConnectionsGraph
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         @query = params[:query]
         length = params[:length]
 
@@ -289,6 +313,10 @@ class HomeController < ApplicationController
     end
 
     def users
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         id = session[:_id]["$oid"]
         user = User.find_by(_id: id)
 
@@ -299,6 +327,14 @@ class HomeController < ApplicationController
     end
 
     def getUsers
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+
         id = session[:_id]["$oid"]
         user = User.find_by(_id: id)
 
@@ -332,6 +368,9 @@ class HomeController < ApplicationController
     end
 
     def activateUser
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
         
         myid = session[:_id]["$oid"]
         me = User.find_by(_id: myid)
@@ -367,6 +406,10 @@ class HomeController < ApplicationController
     end
 
     def updateProfile
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         id = session[:_id]["$oid"]
         name = params[:name]
         current_password = params[:current_password]
