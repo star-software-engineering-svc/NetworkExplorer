@@ -85,6 +85,10 @@ class HomeController < ApplicationController
         end
     end
 
+    def isHash(query)
+        return query && (query.length == 16 || query.length == 53)
+    end
+
     def search
         if session[:email] == nil
             redirect_to home_index_url() and return
@@ -92,10 +96,16 @@ class HomeController < ApplicationController
 
         @query = params[:query]
 
-        @valid = IPAddress.valid? @query
+        @validIp = IPAddress.valid? @query
+        @validHash = self.isHash(@query)
+        @valid = @validIp | @validHash
+        
+        if not @valid
+            @errorMsg = "The site or ip address is not valid."
+            return
+        end
 
-        if @valid
-
+        if @validIp
             @aggResult = ClientConnections.collection.aggregate([
                 { '$match' =>
                     { 'ipaddr' => @query }
@@ -131,14 +141,15 @@ class HomeController < ApplicationController
                             }
                         }
                     ]).count
+                    render 'searchip' and return
                 else
                     @errorMsg = "No results found."
                 end
             else
                 @errorMsg = "No results found."
             end
-        else
-            @errorMsg = "The ip address is not valid."
+        elsif @validHash
+            render 'searchsite' and return
         end
     end
 
