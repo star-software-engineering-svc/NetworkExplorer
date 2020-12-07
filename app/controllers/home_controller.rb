@@ -106,7 +106,7 @@ class HomeController < ApplicationController
         end
 
         if @validIp
-            @aggResult = ClientConnections.collection.aggregate([
+            @aggResult = ClientConnection.collection.aggregate([
                 { '$match' =>
                     { 'ipaddr' => @query }
                 }, 
@@ -127,8 +127,8 @@ class HomeController < ApplicationController
                 @exists = GeoipInfo.where(ip: @query).exists?
                 if @exists
                     @result = GeoipInfo.where(ip: @query).first
-                    @connCount = ClientConnections.where(ipaddr: @query).count
-                    @graphCount = ClientConnections.collection.aggregate([
+                    @connCount = ClientConnection.where(ipaddr: @query).count
+                    @graphCount = ClientConnection.collection.aggregate([
                         {
                             '$match' => { 'ipaddr' => @query }
                         }, 
@@ -149,7 +149,49 @@ class HomeController < ApplicationController
                 @errorMsg = "No results found."
             end
         elsif @validHash
-            render 'searchsite' and return
+            @aggResult = HashedSitesSeen.collection.aggregate([
+                { '$match' =>
+                    { 'hashed_site' => @query }
+                }, 
+                {
+                    '$lookup' => {
+                        'from' => 'client_connections',
+                        'localField' => 'timestamp',
+                        'foreignField' => 'timestamp',
+                        'as' => 'matched_timestamp'
+                    }
+                }, 
+                {
+                    '$sort' => { 'timestamp' => 1 }
+                }
+            ]).count
+
+            if @aggResult > 0
+                @hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+                @connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => @hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    },
+                    {
+                        "$limit" => 3
+                    }
+                ])
+            
+                render 'searchsite' and return
+            else
+                @errorMsg = "No results found."
+            end
         end
     end
 
@@ -165,7 +207,7 @@ class HomeController < ApplicationController
         @query = params[:query]
         length = params[:length]
 
-        result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
 
         respond_to do |format|
             msg = { :result => result }
@@ -195,9 +237,9 @@ class HomeController < ApplicationController
 
         result = []
         if length.to_i > 0
-            result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+            result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
         else
-            result = ClientConnections.where(ipaddr: @query)
+            result = ClientConnection.where(ipaddr: @query)
         end
 
         send_data self.to_conn_csv(result), filename: "connections-#{Date.today}.csv"
@@ -215,7 +257,7 @@ class HomeController < ApplicationController
         @query = params[:query]
         length = params[:length]
 
-        connections = ClientConnections.collection.aggregate([
+        connections = ClientConnection.collection.aggregate([
             {
                 '$match' => { 'ipaddr' => @query }
             }, 
@@ -283,7 +325,7 @@ class HomeController < ApplicationController
 
         result = []
         if length.to_i > 0
-            connections = ClientConnections.collection.aggregate([
+            connections = ClientConnection.collection.aggregate([
             {
                 '$match' => { 'ipaddr' => @query }
             }, 
@@ -300,7 +342,7 @@ class HomeController < ApplicationController
             }
         ])
         else
-            connections = ClientConnections.collection.aggregate([
+            connections = ClientConnection.collection.aggregate([
                 {
                     '$match' => { 'ipaddr' => @query }
                 }, 

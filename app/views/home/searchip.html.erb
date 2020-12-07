@@ -230,7 +230,7 @@ var myChart = echarts.init(document.getElementById('chart'));
 
 const iconFeature = new ol.Feature({
   geometry: new ol.geom.Point(ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>])),
-  name: 'Somewhere near Nottingham',
+  name: '<%= @result[:city] %>',
 });
 
 map = new ol.Map({
