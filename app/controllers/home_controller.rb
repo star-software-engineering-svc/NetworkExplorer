@@ -168,6 +168,20 @@ class HomeController < ApplicationController
 
             if @aggResult > 0
                 @hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+                @connCount = ClientConnection.where(timestamp: @hash_sites_seen.timestamp).count
+                @graphCount = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => @hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }
+                ]).count
                 @connections = ClientConnection.collection.aggregate([
                     {
                         '$match' => { 'timestamp' => @hash_sites_seen.timestamp }
@@ -207,7 +221,14 @@ class HomeController < ApplicationController
         @query = params[:query]
         length = params[:length]
 
-        result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        valid = IPAddress.valid? @query
+
+        if valid 
+            result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            result = ClientConnection.where(timestamp: hash_sites_seen.timestamp).order(:timestamp => 'asc').offset(0).limit(length)
+        end
 
         respond_to do |format|
             msg = { :result => result }
@@ -235,11 +256,22 @@ class HomeController < ApplicationController
         @query = params[:query]
         length = params[:length]
 
+        valid = IPAddress.valid? @query
+
         result = []
-        if length.to_i > 0
-            result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        if valid 
+            if length.to_i > 0
+                result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+            else
+                result = ClientConnection.where(ipaddr: @query)
+            end
         else
-            result = ClientConnection.where(ipaddr: @query)
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            if length.to_i > 0
+                result = ClientConnection.where(timestamp: hash_sites_seen.timestamp).order(:timestamp => 'asc').offset(0).limit(length)
+            else
+                result = ClientConnection.where(timestamp: hash_sites_seen.timestamp)
+            end
         end
 
         send_data self.to_conn_csv(result), filename: "connections-#{Date.today}.csv"
@@ -257,22 +289,47 @@ class HomeController < ApplicationController
         @query = params[:query]
         length = params[:length]
 
-        connections = ClientConnection.collection.aggregate([
-            {
-                '$match' => { 'ipaddr' => @query }
-            }, 
-            {
-                "$group" => { 
-                    '_id' => "$servername",
-                    'count' => { '$sum' => 1 },
-                    "servername" => { "$first" => "$servername" }, 
-                    "conn_num" => { '$sum' => "$conn_num" } 
+        valid = IPAddress.valid? @query
+
+        if valid
+            connections = ClientConnection.collection.aggregate([
+                {
+                    '$match' => { 'ipaddr' => @query }
+                }, 
+                {
+                    "$group" => { 
+                        '_id' => "$servername",
+                        'count' => { '$sum' => 1 },
+                        "servername" => { "$first" => "$servername" }, 
+                        "conn_num" => { '$sum' => "$conn_num" } 
+                    }
+                },
+                {
+                    "$limit" => length.to_i
                 }
-            },
-            {
-                "$limit" => length.to_i
-            }
-        ])
+            ])
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            connections = ClientConnection.collection.aggregate([
+                {
+                    '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                }, 
+                {
+                    '$lookup' => {
+                        'from' => 'geoip_infos',
+                        'localField' => 'ipaddr',
+                        'foreignField' => 'ip',
+                        'as' => 'matched_geoip'
+                    }
+                }, 
+                {
+                    '$sort' => { 'conn_num' => -1 }
+                },
+                {
+                    "$limit" => length.to_i
+                }
+            ])
+        end
 
         nodes = []
         nodes << {:id => @query, :label => @query, :color => '#ee5149', :x => 0, :y => 0, :size => 10}
@@ -293,8 +350,13 @@ class HomeController < ApplicationController
                 size = 30
             end
 
-            nodes << {:id => p[:_id], :label => p[:_id], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
-            edges << {:sourceID => @query, :targetID => p[:_id], :size => 1}
+            if valid
+                nodes << {:id => p[:_id], :label => p[:_id], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
+                edges << {:sourceID => @query, :targetID => p[:_id], :size => 1}
+            else
+                nodes << {:id => p[:ipaddr], :label => p[:ipaddr], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
+                edges << {:sourceID => @query, :targetID => p[:ipaddr], :size => 1}
+            end
         end
 
         respond_to do |format|
