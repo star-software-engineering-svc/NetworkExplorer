@@ -377,6 +377,18 @@ class HomeController < ApplicationController
         end
     end
 
+    def to_conn_graph_site_csv(result)
+        attributes = %w{servername ipaddr conn_num count} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << [conn[:servername], conn[:ipaddr], conn[:conn_num], conn[:count]]
+            end
+        end
+    end
+
     def exportConnectionsGraph
         if session[:email] == nil
             redirect_to home_index_url() and return
@@ -386,25 +398,10 @@ class HomeController < ApplicationController
         length = params[:length]
 
         result = []
-        if length.to_i > 0
-            connections = ClientConnection.collection.aggregate([
-            {
-                '$match' => { 'ipaddr' => @query }
-            }, 
-            {
-                "$group" => { 
-                    '_id' => "$servername",
-                    'count' => { '$sum' => 1 },
-                    "servername" => { "$first" => "$servername" }, 
-                    "conn_num" => { '$sum' => "$conn_num" } 
-                }
-            },
-            {
-                "$limit" => length.to_i
-            }
-        ])
-        else
-            connections = ClientConnection.collection.aggregate([
+        valid = IPAddress.valid? @query
+        if  valid
+            if length.to_i > 0
+                connections = ClientConnection.collection.aggregate([
                 {
                     '$match' => { 'ipaddr' => @query }
                 }, 
@@ -416,10 +413,71 @@ class HomeController < ApplicationController
                         "conn_num" => { '$sum' => "$conn_num" } 
                     }
                 },
+                {
+                    "$limit" => length.to_i
+                }
             ])
-        end
+            else
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'ipaddr' => @query }
+                    }, 
+                    {
+                        "$group" => { 
+                            '_id' => "$servername",
+                            'count' => { '$sum' => 1 },
+                            "servername" => { "$first" => "$servername" }, 
+                            "conn_num" => { '$sum' => "$conn_num" } 
+                        }
+                    },
+                ])
+            end
+        
+            send_data self.to_conn_graph_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
 
-        send_data self.to_conn_graph_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+            if length.to_i > 0
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    },
+                    {
+                        "$limit" => length.to_i
+                    }
+                ])
+            else
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    }
+                ])
+            end
+        
+            send_data self.to_conn_graph_site_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+        end
     end
 
     def logout
