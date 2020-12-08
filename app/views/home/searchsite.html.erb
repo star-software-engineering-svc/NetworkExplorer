@@ -112,7 +112,7 @@
         <table class="domain-table">
           <thead>
             <tr>
-              <th>&nbsp;Site</th>
+              <th>&nbsp;IP Address</th>
               <th class="text-center"># REQUESTS</th>
               <th class="text-right">SEEN&nbsp;</th>
             </tr>
@@ -223,7 +223,7 @@ function loadConnections(length)
         let o = json.result[i]
         let html = [
           '<tr>',
-            '<td class="table-text">', o['servername'], '</td>',
+            '<td class="table-text">', o['ipaddr'], '</td>',
             '<td class="table-text text-center">', o['conn_num'], '</td>',
             '<td class="table-text text-right">', moment.unix(parseInt(o['timestamp'])/1000).format("Do MMMM YYYY - h:m a"), '</td>',
           '</tr>'].join('');
