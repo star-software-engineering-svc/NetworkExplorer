@@ -95,6 +95,9 @@ class HomeController < ApplicationController
         end
 
         @query = params[:query]
+        if @query == nil or @query == ''
+            return
+        end
 
         @validIp = IPAddress.valid? @query
         @validHash = self.isHash(@query)
@@ -224,7 +227,17 @@ class HomeController < ApplicationController
         valid = IPAddress.valid? @query
 
         if valid 
-            result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+            connections = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+
+            result = []
+            connections.each do |conn|
+                hash_sites_seen = HashedSitesSeen.where(servername: conn.servername).where(timestamp: conn.timestamp).first
+                if hash_sites_seen == nil
+                    result << {hashed_site: '-', timestamp: conn.timestamp, conn_num: conn.conn_num}
+                else
+                    result << {hashed_site: hash_sites_seen.hashed_site, timestamp: conn.timestamp, conn_num: conn.conn_num}
+                end
+            end
         else
             hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
             result = ClientConnection.where(timestamp: hash_sites_seen.timestamp).order(:timestamp => 'asc').offset(0).limit(length)
@@ -237,13 +250,13 @@ class HomeController < ApplicationController
     end
 
     def to_conn_csv(result)
-        attributes = %w{servername conn_num timestamp} #customize columns here
+        attributes = %w{hashed_site conn_num timestamp} #customize columns here
 
         CSV.generate(headers: true) do |csv|
             csv << attributes
 
             result.each do |conn|
-                csv << attributes.map{ |attr| conn.send(attr) }
+                csv << [conn[:hashed_site], conn[:conn_num], conn[:timestamp]]
             end
         end
     end
@@ -261,9 +274,19 @@ class HomeController < ApplicationController
         result = []
         if valid 
             if length.to_i > 0
-                result = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+                connections = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
             else
-                result = ClientConnection.where(ipaddr: @query)
+                connections = ClientConnection.where(ipaddr: @query)
+            end
+
+            result = []
+            connections.each do |conn|
+                hash_sites_seen = HashedSitesSeen.where(servername: conn.servername).where(timestamp: conn.timestamp).first
+                if hash_sites_seen == nil
+                    result << {hashed_site: '-', timestamp: conn.timestamp, conn_num: conn.conn_num}
+                else
+                    result << {hashed_site: hash_sites_seen.hashed_site, timestamp: conn.timestamp, conn_num: conn.conn_num}
+                end
             end
         else
             hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first

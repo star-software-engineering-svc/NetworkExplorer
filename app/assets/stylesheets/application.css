@@ -316,3 +316,7 @@ a.footer-link {
     color: #193053;
     padding: 10px 25px;
 }
+
+.pointer {
+    cursor: pointer;
+}
