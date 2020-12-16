@@ -28,40 +28,46 @@
     %>
     <div class="nt-panel" style="margin-bottom: 10px;">
       <div class="row no-gutters">
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
+          <div class="stats">
+            <div>IP</div>
+            <div><%= o ? o[:ip] : '-'%></div>
+          </div>
+        </div>
+        <div class="stats-cell">
           <div class="stats">
             <div>District</div>
-            <div><%= o[:district] %></div>
+            <div><%= o ? o[:district] : '-'%></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
           <div class="stats">
             <div>City</div>
-            <div><%= o[:city] %></div>
+            <div><%= o ? o[:city] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
           <div class="stats">
             <div>State</div>
-            <div><%= o[:state_prov] %></div>
+            <div><%= o ? o[:state_prov] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
           <div class="stats">
             <div>Country</div>
-            <div><%= o[:country_code2] %></div>
+            <div><%= o ? o[:country_code2] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
           <div class="stats">
             <div>Zipcode</div>
-            <div><%= o[:zipcode] %></div>
+            <div><%= o ? o[:zipcode] : '-' %></div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-2">
+        <div class="stats-cell">
           <div class="stats">
             <div>Long/Lat</div>
-            <div><%= o[:latitude] %>, <%= o[:longitude] %></div>
+            <div><%= o ? o[:latitude] : '-' %>, <%= o ? o[:longitude] : '-' %></div>
           </div>
         </div>
       </div>
@@ -72,7 +78,7 @@
 
 <div class="row mt-2 mb-5" style="margin-left: 0px; margin-right: 0px;">
   <div class="col-md-12 col-lg-10 offset-lg-1">
-    <div id="map"></div>
+    <div id="map"><div id="info"></div></div>
   </div>
 </div>
 
@@ -109,12 +115,12 @@
         </div>
       </div>
       <div class="nt-panel-body" style="margin: 0px 20px 0px 20px; overflow: auto; height: 400px;">
-        <table class="domain-table">
+        <table class="domain-table" id="connections-table">
           <thead>
             <tr>
-              <th>&nbsp;IP Address</th>
-              <th class="text-center"># REQUESTS</th>
-              <th class="text-right">SEEN&nbsp;</th>
+              <th class="sort-header pointer">&nbsp;IP Address&nbsp;<i class="fa fa-sort"></i></th>
+              <th class="sort-header pointer text-center"># REQUESTS&nbsp;<i class="fa fa-sort"></i></th>
+              <th class="sort-header pointer text-right">SEEN&nbsp;<i class="fa fa-sort"></i>&nbsp;</th>
             </tr>
           </thead>
           <tbody id="connections_body">
@@ -170,11 +176,14 @@ var myChart = echarts.init(document.getElementById('chart'));
 let icons = [];
 <% @connections.each do |conn| 
   o = conn[:matched_geoip]
+  if o.present?
 %>
 icons.push(new ol.Feature({
   geometry: new ol.geom.Point(ol.proj.fromLonLat([<%= o[0][:longitude] %>, <%= o[0][:latitude] %>])),
-  name: '',
+  name: "<%= o[0][:ip] %>",
+  info: "IP: <%= o[0][:ip] %><br/>Address:<%= o[0][:district] %>, <%= o[0][:city] %>, <%= o[0][:state_prov] %> %>",
 }));
+<% end %>
 <% end %>
 vectorSource = new ol.source.Vector({
   features: icons
@@ -212,6 +221,36 @@ var layerExtent = vectorSource.getExtent();
 map.getView().fit(layerExtent, map.getSize());
 map.getView().animate({zoom: map.getView().getZoom() - 1});
 
+var info = $('#info');
+info.tooltip({
+  animation: false,
+  trigger: 'manual',
+});
+
+var displayFeatureInfo = function (pixel) {
+  info.css({
+    left: pixel[0] + 'px',
+    top: pixel[1] - 15 + 'px',
+  });
+  var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
+    return feature;
+  });
+  console.log(feature)
+  if (feature) {
+    info.attr('data-original-title', feature.get('name')).tooltip('show');
+  } else {
+    info.tooltip('hide');
+  }
+};
+
+map.on('pointermove', function (evt) {
+  if (evt.dragging) {
+    info.tooltip('hide');
+    return;
+  }
+  displayFeatureInfo(map.getEventPixel(evt.originalEvent));
+});
+
 var connectionLength = 10, graphLength = 10;
 function loadConnections(length)
 {
@@ -223,9 +262,9 @@ function loadConnections(length)
         let o = json.result[i]
         let html = [
           '<tr>',
-            '<td class="table-text">', o['ipaddr'], '</td>',
-            '<td class="table-text text-center">', o['conn_num'], '</td>',
-            '<td class="table-text text-right">', moment.unix(parseInt(o['timestamp'])/1000).format("Do MMMM YYYY - h:m a"), '</td>',
+            '<td class="table-text" data-type="string" data-value="">', o['ipaddr'], '</td>',
+            '<td class="table-text text-center" data-type="number">', o['conn_num'], '</td>',
+            '<td class="table-text text-right" data-type="timestamp" data-value="', o['timestamp'], '">', moment.unix(parseInt(o['timestamp'])/1000).format("Do MMMM YYYY - h:m a"), '</td>',
           '</tr>'].join('');
         $(html).appendTo("#connections_body");
       }
@@ -322,6 +361,47 @@ $(document).ready(function() {
 
   loadConnections(10);
   loadConnectionsGraph(10);
+
+  var table = $('#connections-table');
+  
+  $('.sort-header').each(function(){
+    var th = $(this),
+      thIndex = th.index(),
+      inverse = false;
+
+    th.click(function(){
+      if(!inverse)
+        $(this).find('i').removeClass('fa-sort fa-sort-down').addClass('fa-sort-up')
+      else
+        $(this).find('i').removeClass('fa-sort fa-sort-up').addClass('fa-sort-down')
+
+      table.find('td').filter(function(){
+          return $(this).index() === thIndex;
+      }).sortElements(function(a, b){
+        let type = $(a).data('type');
+        if (type === 'number') {
+          return parseInt($.text([a])) > parseInt($.text([b])) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        } else if (type === 'timestamp') {
+          let aval = $(a).data('value')
+          let bval = $(b).data('value')
+          return aval > bval ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+        else {
+          return $.text([a]) > $.text([b]) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+      }, function(){
+        // parentNode is the element we want to move
+        return this.parentNode; 
+      });
+      inverse = !inverse;
+    });
+  });
 });
 </script>
 

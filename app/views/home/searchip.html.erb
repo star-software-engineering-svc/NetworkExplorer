@@ -370,46 +370,46 @@ $(document).ready(function() {
   loadConnections(10);
   loadConnectionsGraph(10);
 
-    var table = $('#connections-table');
-    
-    $('.sort-header').each(function(){
-      var th = $(this),
-        thIndex = th.index(),
-        inverse = false;
+  var table = $('#connections-table');
+  
+  $('.sort-header').each(function(){
+    var th = $(this),
+      thIndex = th.index(),
+      inverse = false;
 
-      th.click(function(){
-        if(!inverse)
-          $(this).find('i').removeClass('fa-sort fa-sort-down').addClass('fa-sort-up')
-        else
-          $(this).find('i').removeClass('fa-sort fa-sort-up').addClass('fa-sort-down')
+    th.click(function(){
+      if(!inverse)
+        $(this).find('i').removeClass('fa-sort fa-sort-down').addClass('fa-sort-up')
+      else
+        $(this).find('i').removeClass('fa-sort fa-sort-up').addClass('fa-sort-down')
 
-        table.find('td').filter(function(){
-            return $(this).index() === thIndex;
-        }).sortElements(function(a, b){
-          let type = $(a).data('type');
-          if (type === 'number') {
-            return parseInt($.text([a])) > parseInt($.text([b])) ?
-              inverse ? -1 : 1
-              : inverse ? 1 : -1;
-          } else if (type === 'timestamp') {
-            let aval = $(a).data('value')
-            let bval = $(b).data('value')
-            return aval > bval ?
-              inverse ? -1 : 1
-              : inverse ? 1 : -1;
-          }
-          else {
-            return $.text([a]) > $.text([b]) ?
-              inverse ? -1 : 1
-              : inverse ? 1 : -1;
-          }
-        }, function(){
-          // parentNode is the element we want to move
-          return this.parentNode; 
-        });
-        inverse = !inverse;
+      table.find('td').filter(function(){
+          return $(this).index() === thIndex;
+      }).sortElements(function(a, b){
+        let type = $(a).data('type');
+        if (type === 'number') {
+          return parseInt($.text([a])) > parseInt($.text([b])) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        } else if (type === 'timestamp') {
+          let aval = $(a).data('value')
+          let bval = $(b).data('value')
+          return aval > bval ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+        else {
+          return $.text([a]) > $.text([b]) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+      }, function(){
+        // parentNode is the element we want to move
+        return this.parentNode; 
       });
+      inverse = !inverse;
     });
+  });
 });
 </script>
 

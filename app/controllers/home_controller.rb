@@ -249,7 +249,7 @@ class HomeController < ApplicationController
         end
     end
 
-    def to_conn_csv(result)
+    def to_conn_csv_ip(result)
         attributes = %w{hashed_site conn_num timestamp} #customize columns here
 
         CSV.generate(headers: true) do |csv|
@@ -257,6 +257,18 @@ class HomeController < ApplicationController
 
             result.each do |conn|
                 csv << [conn[:hashed_site], conn[:conn_num], conn[:timestamp]]
+            end
+        end
+    end
+
+    def to_conn_csv_site(result)
+        attributes = %w{ipaddr conn_num timestamp} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << [conn[:ipaddr], conn[:conn_num], conn[:timestamp]]
             end
         end
     end
@@ -288,6 +300,7 @@ class HomeController < ApplicationController
                     result << {hashed_site: hash_sites_seen.hashed_site, timestamp: conn.timestamp, conn_num: conn.conn_num}
                 end
             end
+            send_data self.to_conn_csv_ip(result), filename: "connections-#{Date.today}.csv"
         else
             hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
             if length.to_i > 0
@@ -295,9 +308,9 @@ class HomeController < ApplicationController
             else
                 result = ClientConnection.where(timestamp: hash_sites_seen.timestamp)
             end
+            
+            send_data self.to_conn_csv_site(result), filename: "connections-#{Date.today}.csv"
         end
-
-        send_data self.to_conn_csv(result), filename: "connections-#{Date.today}.csv"
     end
 
     def getConnectionsGraph
