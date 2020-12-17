@@ -157,12 +157,16 @@
               <img class="caret" src="/images/caret.png"/>
               <a class="" href="javascript:exportConnectionGraph()">Export</a>
               <a class="" href="javascript:exportConnectionGraphAll(0)">Export all</a>
+              <a class="" href="javascript:exportAsImage()">Export As Image</a>
             </div>
           </div>
         </div>
       </div>
       <div class="nt-panel-body">
+      <!--
         <div id="chart" style="width: 100%; height: 400px;"></div>
+      -->
+        <div id="cy" style="width: 100%; height: 400px;"></div>
         <div class="total-conn text-right">Total: <%= @graphCount ? @graphCount : '-' %></div>
       </div>
     </div>
@@ -171,7 +175,7 @@
 <%=@tmp%>
 <script>
 var map;
-var myChart = echarts.init(document.getElementById('chart'));
+// var myChart = echarts.init(document.getElementById('chart'));
 
 let icons = [];
 <% @connections.each do |conn| 
@@ -235,7 +239,6 @@ var displayFeatureInfo = function (pixel) {
   var feature = map.forEachFeatureAtPixel(pixel, function (feature) {
     return feature;
   });
-  console.log(feature)
   if (feature) {
     info.attr('data-original-title', feature.get('name')).tooltip('show');
   } else {
@@ -278,6 +281,7 @@ function loadConnectionsGraph(length)
 {
   graphLength = length;
   // myChart.showLoading();
+  /*
   $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
     myChart.hideLoading();
     myChart.setOption(option = {
@@ -334,6 +338,59 @@ function loadConnectionsGraph(length)
         }
       ]
     }, true);
+  });
+  */
+  $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
+    var cy = cytoscape({
+      container: document.getElementById('cy'), // container to render in
+
+      elements: json.data,
+
+        boxSelectionEnabled: true,
+        autounselectify: true,
+        layout: {
+          name: 'concentric',
+        },
+
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(id)',
+              'height': 1,
+              'width': 1,
+              'background-color': '#30c9bc'
+            }
+          },
+
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'haystack',
+              'haystack-radius': 0,
+              'width': 0.1,
+              'opacity': 0.5,
+              'line-color': '#193053'
+            }
+          },
+
+          {
+            selector: 'label',
+            style: {
+              'font-size': 1
+            }
+          }
+        ],
+    });
+  });
+}
+
+function exportAsImage() {
+  var cv = $("#cy").find("canvas").get();
+  console.log(cv[2]);
+  var canvas = cv[2]
+  canvas.toBlob(function(blob) {
+      saveAs(blob, "connections-graph.png");
   });
 }
 

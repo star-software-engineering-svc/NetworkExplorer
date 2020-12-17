@@ -212,12 +212,13 @@
               <img class="caret" src="/images/caret.png"/>
               <a class="" href="javascript:exportConnectionGraph()">Export</a>
               <a class="" href="javascript:exportConnectionGraphAll(0)">Export all</a>
+              <a class="" href="javascript:exportAsImage()">Export As Image</a>
             </div>
           </div>
         </div>
       </div>
       <div class="nt-panel-body">
-        <div id="chart" style="width: 100%; height: 400px;"></div>
+        <div id="cy" style="width: 100%; height: 400px;"></div>
         <div class="total-conn text-right">Total: <%= @graphCount ? @graphCount : '-' %></div>
       </div>
     </div>
@@ -226,7 +227,6 @@
 
 <script>
 var map;
-var myChart = echarts.init(document.getElementById('chart'));
 
 const iconFeature = new ol.Feature({
   geometry: new ol.geom.Point(ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>])),
@@ -282,66 +282,62 @@ function loadConnections(length)
   })
 }
 
+var cy = null;
 function loadConnectionsGraph(length)
 {
   graphLength = length;
   // myChart.showLoading();
   $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
-    myChart.hideLoading();
-    myChart.setOption(option = {
-      title: {
-          text: ''
-      },
-      animationDurationUpdate: 1500,
-      animationEasingUpdate: 'quinticInOut',
-      tooltip: {
-        trigger: 'item'
-      },
-      series : [
-        {
-          type: 'graph',
-          layout: 'none',
-          // progressiveThreshold: 700,
-          data: json.nodes.map(function (node) {
-            return {
-              x: node.x,
-              y: node.y,
-              id: node.id,
-              name: node.label,
-              value: node.conn_num,
-              symbolSize: node.size,
-              itemStyle: {
-                  color: node.color
-              },
-            };
-          }),
-          center: [0, 0],
-          edges: json.edges.map(function (edge) {
-            return {
-              source: edge.sourceID,
-              target: edge.targetID
-            };
-          }),
-          emphasis: {
-            label: {
-              position: 'right',
-              show: true
+    cy = cytoscape({
+      container: document.getElementById('cy'), // container to render in
+
+      elements: json.data,
+
+        boxSelectionEnabled: true,
+        autounselectify: true,
+        layout: {
+          name: 'concentric',
+        },
+
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(id)',
+              'height': 1,
+              'width': 1,
+              'background-color': '#30c9bc'
             }
           },
-          label: {
-            position: 'right',
-            show: true
+
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'haystack',
+              'haystack-radius': 0,
+              'width': 0.1,
+              'opacity': 0.5,
+              'line-color': '#193053'
+            }
           },
-          roam: true,
-          focusNodeAdjacency: false,
-          lineStyle: {
-            width: 0.5,
-            curveness: 0,
-            opacity: 0.7
+
+          {
+            selector: 'label',
+            style: {
+              'font-size': 1
+            }
           }
-        }
-      ]
-    }, true);
+        ],
+    });
+  });
+}
+
+function exportAsImage() {
+  var cv = $("#cy").find("canvas").get();
+  console.log(cv[2]);
+  var canvas = cv[2]
+  canvas.toBlob(function(blob) {
+      saveAs(blob, "connections-graph.png");
   });
 }
 

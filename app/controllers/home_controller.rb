@@ -367,10 +367,16 @@ class HomeController < ApplicationController
             ])
         end
 
-        nodes = []
-        nodes << {:id => @query, :label => @query, :color => '#ee5149', :x => 0, :y => 0, :size => 10}
+        data = []
+        data << {:data => {:id => @query, :label => @query}, :style => {'background-color' => '#ff0000'}}
 
-        edges = []
+        connections.each do |p|
+            if valid
+                data << {:data => {:id => p[:servername]}, :style => {'background-color' => '#193053'}}
+            else
+                data << {:data => {:id => p[:ipaddr]}, :style => {'background-color' => '#193053'}}
+            end
+        end
 
         connections.each do |p|
             size = p[:conn_num]
@@ -387,16 +393,14 @@ class HomeController < ApplicationController
             end
 
             if valid
-                nodes << {:id => p[:_id], :label => p[:_id], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
-                edges << {:sourceID => @query, :targetID => p[:_id], :size => 1}
+                data << {:data => {:id =>@query + p[:servername], :source => @query, :target => p[:servername]}}
             else
-                nodes << {:id => p[:ipaddr], :label => p[:ipaddr], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
-                edges << {:sourceID => @query, :targetID => p[:ipaddr], :size => 1}
+                data << {:data => {:id =>@query + p[:ipaddr], :source => @query, :target => p[:ipaddr]}}
             end
         end
 
         respond_to do |format|
-            msg = { :nodes => nodes, :edges => edges }
+            msg = { :data => data }
             format.json  { render :json => msg }
         end
     end
