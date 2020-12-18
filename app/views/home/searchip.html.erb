@@ -1,0 +1,420 @@
+
+<script src="/js/echarts/echarts.min.js"></script>
+
+<div class="row" style="margin: 0px;">
+  <div class="col-12">
+    <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">Network Explorer</h1>
+    <p class="text-center" style="font-size: 14px; margin-bottom: 25px;">Learn information about a site or IP address</p>
+    <div class="login-form" style="">
+      <form method="get">
+        <div class="row">
+          <div class="col-8" style="padding: 0px;">
+            <input type="text" class="form-control" style="height: 46px;" name="query" value="<%= params[:query] %>">
+          </div>
+          <div class="col-4" style="padding: 0px 0px 0px 5px;">
+            <button type="submit" class="btn btn-danger w-100">Explore</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% if params[:query] and not @errorMsg %>
+<div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <h5 class="welcome-text">WHOIS</h5>
+    <div class="nt-panel">
+      <div class="w-100" style="margin: 0px; padding: 0px;">
+        <div class="stats-cell">
+          <div class="stats">
+            <div>IP</div>
+            <div><%= @result ? @result[:ip] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>ISP</div>
+            <div><%= @result ? @result[:isp] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>ASN</div>
+            <div><%= @result ? @result[:asn] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Threat Score</div>
+            <div><%= @result ? @result[:security][:threat_score] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Tor</div>
+            <div><%= @result ? @result[:security][:is_tor] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Proxy</div>
+            <div><%= @result ? @result[:security][:is_proxy] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Proxy Type</div>
+            <div><%= @result ? @result[:security][:proxy_type] : '-' %>&nbsp;</div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Anonymous</div>
+            <div><%= @result ? @result[:security][:is_anonymous] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Known Attacker</div>
+            <div><%= @result ? @result[:security][:is_known_attacker] : '-' %></div>
+          </div>
+        </div><!--
+        --><div class="stats-cell">
+          <div class="stats">
+            <div>Cloud Provider</div>
+            <div><%= @result ? @result[:security][:is_cloud_provider] : '-' %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h5 class="welcome-text mt-4">GEOIP</h5>
+    <div class="nt-panel">
+      <div class="row no-gutters">
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>District</div>
+            <div><%= @result ? @result[:district] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>City</div>
+            <div><%= @result ? @result[:city] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>State</div>
+            <div><%= @result ? @result[:state_prov] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>Country</div>
+            <div><%= @result ? @result[:country_code2] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>Zipcode</div>
+            <div><%= @result ? @result[:zipcode] : '-' %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-2">
+          <div class="stats">
+            <div>Long/Lat</div>
+            <div><%= @result ? @result[:latitude] : '-' %>, <%= @result ? @result[:longitude] : '-' %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-2 mb-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <div id="map"></div>
+  </div>
+</div>
+
+<div class="row" style="margin-left: 0px; margin-right: 0px; display:flex;">
+  <div class="col-sm-12 col-md-6 col-lg-5 offset-lg-1" style="display: flex; flex-direction: column;">
+    <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
+      <div class="clearfix nt-panel-header">
+        <div class="header-title" style="float: left;">
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Connections</h5>
+        </div>
+        <div class="header-tools" style="float: right">
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
+              <span style="color: #193053;">Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:loadConnections(10)">Show: 10</a>
+              <a class="" href="javascript:loadConnections(100)">Show: 100</a>
+              <a class="" href="javascript:loadConnections(1000)">Show: 1000</a>
+            </div>
+          </div>
+
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
+              <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;" data-type="menu">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="" href="javascript:exportConnections()">Export</a>
+              <a class="" href="javascript:exportConnectionsAll()">Export all</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nt-panel-body" style="margin: 0px 20px 0px 20px; overflow: auto; height: 400px;">
+        <table id="connections-table" class="domain-table">
+          <thead>
+            <tr>
+              <th class="sort-header pointer">&nbsp;Site&nbsp;<i class="fa fa-sort"></i></th>
+              <th class="text-center sort-header pointer"># REQUESTS&nbsp;<i class="fa fa-sort"></i></th>
+              <th class="text-right sort-header pointer">SEEN&nbsp;<i class="fa fa-sort"></i>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody id="connections_body">
+          </tbody>
+        </table>
+      </div>
+      <div class="total-conn text-right">Total: <%= @connCount ? @connCount : '-' %> </div>
+    </div>
+  </div>
+  <div class="col-md-6 col-lg-5" style="display: flex; flex-direction: column;">
+    <div class="nt-panel mb-5" style="padding: 0px; height: 100%;">
+      <div class="clearfix nt-panel-header" style="border-bottom: 1px solid #e6e6e6d6;">
+        <div class="header-title" style="float: left;">
+          <h5 class="welcome-text mb-0" style="padding-top: 10px;">Graph of Connections</h5>
+        </div>
+        <div class="header-tools" style="float: right">
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-link dropdown-button" style="font-size: 13px; padding: 10px 20px;">
+              <span style="color: #193053;">Show:10</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color: #193053;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="opt-selected" href="javascript:loadConnectionsGraph(10)">Show: 10</a>
+              <a class="" href="javascript:loadConnectionsGraph(100)">Show: 100</a>
+              <a class="" href="javascript:loadConnectionsGraph(1000)">Show: 1000</a>
+            </div>
+          </div>
+          
+          <div class="nt-dropdown-group" style="display: inline">
+            <button type="button" class="btn btn-danger dropdown-button" style="font-size: 13px; padding: 10px 20px">
+              <span style="color: white;">Export</span>&nbsp;&nbsp;&nbsp;<i class="fas fa-chevron-down" style="color:white;"></i>
+            </button>
+            <div class="nt-dropdown" style="width: max-content; display: none; z-index: 999;" data-type="menu">
+              <img class="caret" src="/images/caret.png"/>
+              <a class="" href="javascript:exportConnectionGraph()">Export</a>
+              <a class="" href="javascript:exportConnectionGraphAll(0)">Export all</a>
+              <a class="" href="javascript:exportAsImage()">Export As Image</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nt-panel-body">
+        <div id="cy" style="width: 100%; height: 400px;"></div>
+        <div class="total-conn text-right">Total: <%= @graphCount ? @graphCount : '-' %></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var map;
+
+const iconFeature = new ol.Feature({
+  geometry: new ol.geom.Point(ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>])),
+  name: '<%= @result[:city] %>',
+});
+
+map = new ol.Map({
+  target: 'map',
+  layers: [
+    new ol.layer.Tile({
+      source: new ol.source.OSM(),
+    }),
+    new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [iconFeature]
+      }),
+      style: new ol.style.Style({
+        image: new ol.style.Icon({
+          anchor: [0.5, 32],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          src: '<%= ENV['base_url'] %>/images/map-marker-32.png'
+        })
+      })
+    })
+  ],
+  view: new ol.View({
+    center: ol.proj.fromLonLat([<%= @result[:longitude] %>, <%= @result[:latitude] %>]),
+    zoom: 8
+  })
+});
+
+var connectionLength = 10, graphLength = 10;
+function loadConnections(length)
+{
+  connectionLength = length;
+  $.getJSON('<%= ENV['base_url'] %>/home/getConnections?length=' + length + '&query=<%=params[:query]%>', function(json) {
+    $("#connections_body").empty();
+    if(json.result.length > 0) {
+      for(var i in json.result) {
+        let o = json.result[i]
+        let html = [
+          '<tr>',
+            '<td class="table-text" data-type="string">', o['hashed_site'], '</td>',
+            '<td class="table-text text-center" data-type="number">', o['conn_num'], '</td>',
+            '<td class="table-text text-right" data-type="timestamp" data-value="',  o['timestamp'], '">', moment.unix(parseInt(o['timestamp'])/1000).format("Do MMMM YYYY - h:m a"), '</td>',
+          '</tr>'].join('');
+        $(html).appendTo("#connections_body");
+      }
+    } else {
+      $("#connections_body").html('<tr><td colspan="3">No data</td></tr>');
+    }
+  })
+}
+
+var cy = null;
+function loadConnectionsGraph(length)
+{
+  graphLength = length;
+  // myChart.showLoading();
+  $.getJSON('<%= ENV['base_url'] %>/home/getConnectionsGraph?length=' + length + '&query=<%=params[:query]%>', function (json) {
+    cy = cytoscape({
+      container: document.getElementById('cy'), // container to render in
+
+      elements: json.data,
+
+        boxSelectionEnabled: true,
+        autounselectify: true,
+        layout: {
+          name: 'concentric',
+        },
+
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(id)',
+              'height': 1,
+              'width': 1,
+              'background-color': '#30c9bc'
+            }
+          },
+
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'haystack',
+              'haystack-radius': 0,
+              'width': 0.1,
+              'opacity': 0.5,
+              'line-color': '#193053'
+            }
+          },
+
+          {
+            selector: 'label',
+            style: {
+              'font-size': 1
+            }
+          }
+        ],
+    });
+  });
+}
+
+function exportAsImage() {
+  var cv = $("#cy").find("canvas").get();
+  console.log(cv[2]);
+  var canvas = cv[2]
+  canvas.toBlob(function(blob) {
+      saveAs(blob, "connections-graph.png");
+  });
+}
+
+function exportConnections()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnections?length=' + connectionLength + '&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionsAll()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnections?length=-1&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionGraph()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnectionsGraph?length=' + graphLength + '&query=<%=params[:query]%>', '_blank');
+}
+
+function exportConnectionGraphAll()
+{
+  window.open('<%= ENV['base_url'] %>/home/exportConnectionsGraph?length=-1&query=<%=params[:query]%>', '_blank');
+}
+
+$(document).ready(function() {
+
+  loadConnections(10);
+  loadConnectionsGraph(10);
+
+  var table = $('#connections-table');
+  
+  $('.sort-header').each(function(){
+    var th = $(this),
+      thIndex = th.index(),
+      inverse = false;
+
+    th.click(function(){
+      if(!inverse)
+        $(this).find('i').removeClass('fa-sort fa-sort-down').addClass('fa-sort-up')
+      else
+        $(this).find('i').removeClass('fa-sort fa-sort-up').addClass('fa-sort-down')
+
+      table.find('td').filter(function(){
+          return $(this).index() === thIndex;
+      }).sortElements(function(a, b){
+        let type = $(a).data('type');
+        if (type === 'number') {
+          return parseInt($.text([a])) > parseInt($.text([b])) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        } else if (type === 'timestamp') {
+          let aval = $(a).data('value')
+          let bval = $(b).data('value')
+          return aval > bval ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+        else {
+          return $.text([a]) > $.text([b]) ?
+            inverse ? -1 : 1
+            : inverse ? 1 : -1;
+        }
+      }, function(){
+        // parentNode is the element we want to move
+        return this.parentNode; 
+      });
+      inverse = !inverse;
+    });
+  });
+});
+</script>
+
+<% elsif params[:query] and params[:query] != '' and @errorMsg  %>
+<div class="row mt-5" style="margin-left: 0px; margin-right: 0px;">
+  <div class="col-md-12 col-lg-10 offset-lg-1">
+    <div class="alert alert-warning" role="alert">
+      <%=@errorMsg%>
+    </div>
+  </div>
+</div>
+<% end %>

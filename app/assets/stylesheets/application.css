@@ -168,13 +168,13 @@ div.nt-panel-header {
 
 @media (min-width: 576px) {
     .stats-cell {
-        width: 20%;
+        width: 50%;
     }
 }
 
 @media (min-width: 768px) {
     .stats-cell {
-        width: 20%;
+        width: 30%;
     }
 }
 
@@ -186,7 +186,7 @@ div.nt-panel-header {
 
 @media (min-width: 1200px) {
     .stats-cell {
-        width: 10%;
+        width: 14%;
     }
 }
 
@@ -315,4 +315,29 @@ a.footer-link {
     font-size: 14px;
     color: #193053;
     padding: 10px 25px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+#map {
+  position: relative;
+}
+#info {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  z-index: 100;
+  background: black;
+  color: white;
+}
+.tooltip.in {
+  opacity: 1;
+}
+.tooltip.top .tooltip-arrow {
+  border-top-color: white;
+}
+.tooltip-inner {
+  border: 2px solid white;
 }

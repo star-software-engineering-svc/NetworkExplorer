@@ -1,4 +1,4 @@
-class ClientConnections
+class ClientConnection
     include Mongoid::Document
 
     field :timestamp, type:Integer

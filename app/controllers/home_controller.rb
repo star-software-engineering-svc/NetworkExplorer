@@ -85,18 +85,31 @@ class HomeController < ApplicationController
         end
     end
 
+    def isHash(query)
+        return query && (query.length == 16 || query.length == 53)
+    end
+
     def search
         if session[:email] == nil
             redirect_to home_index_url() and return
         end
 
         @query = params[:query]
+        if @query == nil or @query == ''
+            return
+        end
 
-        @valid = IPAddress.valid? @query
+        @validIp = IPAddress.valid? @query
+        @validHash = self.isHash(@query)
+        @valid = @validIp | @validHash
+        
+        if not @valid
+            @errorMsg = "The site or ip address is not valid."
+            return
+        end
 
-        if @valid
-
-            @aggResult = ClientConnections.collection.aggregate([
+        if @validIp
+            @aggResult = ClientConnection.collection.aggregate([
                 { '$match' =>
                     { 'ipaddr' => @query }
                 }, 
@@ -117,8 +130,8 @@ class HomeController < ApplicationController
                 @exists = GeoipInfo.where(ip: @query).exists?
                 if @exists
                     @result = GeoipInfo.where(ip: @query).first
-                    @connCount = ClientConnections.where(ipaddr: @query).count
-                    @graphCount = ClientConnections.collection.aggregate([
+                    @connCount = ClientConnection.where(ipaddr: @query).count
+                    @graphCount = ClientConnection.collection.aggregate([
                         {
                             '$match' => { 'ipaddr' => @query }
                         }, 
@@ -131,22 +144,104 @@ class HomeController < ApplicationController
                             }
                         }
                     ]).count
+                    render 'searchip' and return
                 else
                     @errorMsg = "No results found."
                 end
             else
                 @errorMsg = "No results found."
             end
-        else
-            @errorMsg = "The ip address is not valid."
+        elsif @validHash
+            @aggResult = HashedSitesSeen.collection.aggregate([
+                { '$match' =>
+                    { 'hashed_site' => @query }
+                }, 
+                {
+                    '$lookup' => {
+                        'from' => 'client_connections',
+                        'localField' => 'timestamp',
+                        'foreignField' => 'timestamp',
+                        'as' => 'matched_timestamp'
+                    }
+                }, 
+                {
+                    '$sort' => { 'timestamp' => 1 }
+                }
+            ]).count
+
+            if @aggResult > 0
+                @hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+                @connCount = ClientConnection.where(timestamp: @hash_sites_seen.timestamp).count
+                @graphCount = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => @hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }
+                ]).count
+                @connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => @hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    },
+                    {
+                        "$limit" => 3
+                    }
+                ])
+            
+                render 'searchsite' and return
+            else
+                @errorMsg = "No results found."
+            end
         end
     end
 
     def getConnections
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+
         @query = params[:query]
         length = params[:length]
 
-        result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+        valid = IPAddress.valid? @query
+
+        if valid 
+            connections = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+
+            result = []
+            connections.each do |conn|
+                hash_sites_seen = HashedSitesSeen.where(servername: conn.servername).where(timestamp: conn.timestamp).first
+                if hash_sites_seen == nil
+                    result << {hashed_site: '-', timestamp: conn.timestamp, conn_num: conn.conn_num}
+                else
+                    result << {hashed_site: hash_sites_seen.hashed_site, timestamp: conn.timestamp, conn_num: conn.conn_num}
+                end
+            end
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            result = ClientConnection.where(timestamp: hash_sites_seen.timestamp).order(:timestamp => 'asc').offset(0).limit(length)
+        end
 
         respond_to do |format|
             msg = { :result => result }
@@ -154,57 +249,134 @@ class HomeController < ApplicationController
         end
     end
 
-    def to_conn_csv(result)
-        attributes = %w{servername conn_num timestamp} #customize columns here
+    def to_conn_csv_ip(result)
+        attributes = %w{hashed_site conn_num timestamp} #customize columns here
 
         CSV.generate(headers: true) do |csv|
             csv << attributes
 
             result.each do |conn|
-                csv << attributes.map{ |attr| conn.send(attr) }
+                csv << [conn[:hashed_site], conn[:conn_num], conn[:timestamp]]
+            end
+        end
+    end
+
+    def to_conn_csv_site(result)
+        attributes = %w{ipaddr conn_num timestamp} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << [conn[:ipaddr], conn[:conn_num], conn[:timestamp]]
             end
         end
     end
 
     def exportConnections
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         @query = params[:query]
         length = params[:length]
 
-        result = []
-        if length.to_i > 0
-            result = ClientConnections.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
-        else
-            result = ClientConnections.where(ipaddr: @query)
-        end
+        valid = IPAddress.valid? @query
 
-        send_data self.to_conn_csv(result), filename: "connections-#{Date.today}.csv"
+        result = []
+        if valid 
+            if length.to_i > 0
+                connections = ClientConnection.where(ipaddr: @query).order(:timestamp => 'asc').offset(0).limit(length)
+            else
+                connections = ClientConnection.where(ipaddr: @query)
+            end
+
+            result = []
+            connections.each do |conn|
+                hash_sites_seen = HashedSitesSeen.where(servername: conn.servername).where(timestamp: conn.timestamp).first
+                if hash_sites_seen == nil
+                    result << {hashed_site: '-', timestamp: conn.timestamp, conn_num: conn.conn_num}
+                else
+                    result << {hashed_site: hash_sites_seen.hashed_site, timestamp: conn.timestamp, conn_num: conn.conn_num}
+                end
+            end
+            send_data self.to_conn_csv_ip(result), filename: "connections-#{Date.today}.csv"
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            if length.to_i > 0
+                result = ClientConnection.where(timestamp: hash_sites_seen.timestamp).order(:timestamp => 'asc').offset(0).limit(length)
+            else
+                result = ClientConnection.where(timestamp: hash_sites_seen.timestamp)
+            end
+            
+            send_data self.to_conn_csv_site(result), filename: "connections-#{Date.today}.csv"
+        end
     end
 
     def getConnectionsGraph
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+        
         @query = params[:query]
         length = params[:length]
 
-        connections = ClientConnections.collection.aggregate([
-            {
-                '$match' => { 'ipaddr' => @query }
-            }, 
-            {
-                "$group" => { 
-                    '_id' => "$servername",
-                    'count' => { '$sum' => 1 },
-                    "servername" => { "$first" => "$servername" }, 
-                    "conn_num" => { '$sum' => "$conn_num" } 
+        valid = IPAddress.valid? @query
+
+        if valid
+            connections = ClientConnection.collection.aggregate([
+                {
+                    '$match' => { 'ipaddr' => @query }
+                }, 
+                {
+                    "$group" => { 
+                        '_id' => "$servername",
+                        'count' => { '$sum' => 1 },
+                        "servername" => { "$first" => "$servername" }, 
+                        "conn_num" => { '$sum' => "$conn_num" } 
+                    }
+                },
+                {
+                    "$limit" => length.to_i
                 }
-            },
-            {
-                "$limit" => length.to_i
-            }
-        ])
+            ])
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
+            connections = ClientConnection.collection.aggregate([
+                {
+                    '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                }, 
+                {
+                    '$lookup' => {
+                        'from' => 'geoip_infos',
+                        'localField' => 'ipaddr',
+                        'foreignField' => 'ip',
+                        'as' => 'matched_geoip'
+                    }
+                }, 
+                {
+                    '$sort' => { 'conn_num' => -1 }
+                },
+                {
+                    "$limit" => length.to_i
+                }
+            ])
+        end
 
-        nodes = []
-        nodes << {:id => @query, :label => @query, :color => '#ee5149', :x => 0, :y => 0, :size => 10}
+        data = []
+        data << {:data => {:id => @query, :label => @query}, :style => {'background-color' => '#ff0000'}}
 
-        edges = []
+        connections.each do |p|
+            if valid
+                data << {:data => {:id => p[:servername]}, :style => {'background-color' => '#193053'}}
+            else
+                data << {:data => {:id => p[:ipaddr]}, :style => {'background-color' => '#193053'}}
+            end
+        end
 
         connections.each do |p|
             size = p[:conn_num]
@@ -220,12 +392,15 @@ class HomeController < ApplicationController
                 size = 30
             end
 
-            nodes << {:id => p[:_id], :label => p[:_id], :color => '#193053', :x => Random.new.rand(-500..500), :y => Random.new.rand(-500..500), :size => size, :conn_num => p[:conn_num], :total => p[:count] }
-            edges << {:sourceID => @query, :targetID => p[:_id], :size => 1}
+            if valid
+                data << {:data => {:id =>@query + p[:servername], :source => @query, :target => p[:servername]}}
+            else
+                data << {:data => {:id =>@query + p[:ipaddr], :source => @query, :target => p[:ipaddr]}}
+            end
         end
 
         respond_to do |format|
-            msg = { :nodes => nodes, :edges => edges }
+            msg = { :data => data }
             format.json  { render :json => msg }
         end
     end
@@ -242,30 +417,31 @@ class HomeController < ApplicationController
         end
     end
 
+    def to_conn_graph_site_csv(result)
+        attributes = %w{servername ipaddr conn_num count} #customize columns here
+
+        CSV.generate(headers: true) do |csv|
+            csv << attributes
+
+            result.each do |conn|
+                csv << [conn[:servername], conn[:ipaddr], conn[:conn_num], conn[:count]]
+            end
+        end
+    end
+
     def exportConnectionsGraph
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         @query = params[:query]
         length = params[:length]
 
         result = []
-        if length.to_i > 0
-            connections = ClientConnections.collection.aggregate([
-            {
-                '$match' => { 'ipaddr' => @query }
-            }, 
-            {
-                "$group" => { 
-                    '_id' => "$servername",
-                    'count' => { '$sum' => 1 },
-                    "servername" => { "$first" => "$servername" }, 
-                    "conn_num" => { '$sum' => "$conn_num" } 
-                }
-            },
-            {
-                "$limit" => length.to_i
-            }
-        ])
-        else
-            connections = ClientConnections.collection.aggregate([
+        valid = IPAddress.valid? @query
+        if  valid
+            if length.to_i > 0
+                connections = ClientConnection.collection.aggregate([
                 {
                     '$match' => { 'ipaddr' => @query }
                 }, 
@@ -277,10 +453,71 @@ class HomeController < ApplicationController
                         "conn_num" => { '$sum' => "$conn_num" } 
                     }
                 },
+                {
+                    "$limit" => length.to_i
+                }
             ])
-        end
+            else
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'ipaddr' => @query }
+                    }, 
+                    {
+                        "$group" => { 
+                            '_id' => "$servername",
+                            'count' => { '$sum' => 1 },
+                            "servername" => { "$first" => "$servername" }, 
+                            "conn_num" => { '$sum' => "$conn_num" } 
+                        }
+                    },
+                ])
+            end
+        
+            send_data self.to_conn_graph_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+        else
+            hash_sites_seen = HashedSitesSeen.where(hashed_site: @query).first
 
-        send_data self.to_conn_graph_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+            if length.to_i > 0
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    },
+                    {
+                        "$limit" => length.to_i
+                    }
+                ])
+            else
+                connections = ClientConnection.collection.aggregate([
+                    {
+                        '$match' => { 'timestamp' => hash_sites_seen.timestamp }
+                    }, 
+                    {
+                        '$lookup' => {
+                            'from' => 'geoip_infos',
+                            'localField' => 'ipaddr',
+                            'foreignField' => 'ip',
+                            'as' => 'matched_geoip'
+                        }
+                    }, 
+                    {
+                        '$sort' => { 'conn_num' => -1 }
+                    }
+                ])
+            end
+        
+            send_data self.to_conn_graph_site_csv(connections), filename: "connections-graph-#{Date.today}.csv"
+        end
     end
 
     def logout
@@ -289,6 +526,10 @@ class HomeController < ApplicationController
     end
 
     def users
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         id = session[:_id]["$oid"]
         user = User.find_by(_id: id)
 
@@ -299,6 +540,14 @@ class HomeController < ApplicationController
     end
 
     def getUsers
+        if session[:email] == nil
+            respond_to do |format|
+                msg = { :type => 'e_fail' }
+                format.json  { render :json => msg }
+            end
+            return
+        end
+
         id = session[:_id]["$oid"]
         user = User.find_by(_id: id)
 
@@ -332,6 +581,9 @@ class HomeController < ApplicationController
     end
 
     def activateUser
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
         
         myid = session[:_id]["$oid"]
         me = User.find_by(_id: myid)
@@ -367,6 +619,10 @@ class HomeController < ApplicationController
     end
 
     def updateProfile
+        if session[:email] == nil
+            redirect_to home_index_url() and return
+        end
+
         id = session[:_id]["$oid"]
         name = params[:name]
         current_password = params[:current_password]
