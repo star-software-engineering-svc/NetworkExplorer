@@ -1,4 +1,6 @@
 require 'csv'
+require 'bcrypt'
+
 class HomeController < ApplicationController
     def index
     end
@@ -29,7 +31,13 @@ class HomeController < ApplicationController
                 return
             end
 
-            if @user.password == Digest::MD5.hexdigest(@password)
+            begin
+                decrypt_hash = BCrypt::Password.new(@user.password)
+            rescue => ex
+                logger.error ex.message
+            end
+
+            if decrypt_hash == @password
                 session[:_id] = @user[:_id]
                 session[:name] = @user[:name]
                 session[:email] = @user[:email]
@@ -76,7 +84,7 @@ class HomeController < ApplicationController
             user = User.new
             user.name = @name
             user.email = @email
-            user.password = Digest::MD5.hexdigest(@password)
+            user.password = BCrypt::Password.create(@password) # Digest::MD5.hexdigest(@password)
             user.is_admin = false
             user.is_verified = false
             user.save
@@ -317,7 +325,7 @@ class HomeController < ApplicationController
         if session[:email] == nil
             respond_to do |format|
                 msg = { :type => 'e_fail' }
-                format.json  { render :json => msg }
+                format.json { render :json => msg }
             end
             return
         end
@@ -656,14 +664,16 @@ class HomeController < ApplicationController
 
         user = User.find_by(_id: id)
 
-        if user.password != Digest::MD5.hexdigest(current_password)
+        decrypt_hash = BCrypt::Password.new(user.password)
+
+        if decrypt_hash != current_password
             @error = "The current password is not correct."
             render "profile"
             return
         end
 
         user.name = name
-        user.password = Digest::MD5.hexdigest(password)
+        user.password = BCrypt::Password.create(password)
         user.save
 
         session[:name] = name

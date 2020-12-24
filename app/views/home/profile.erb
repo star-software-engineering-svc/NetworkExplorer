@@ -1,5 +1,6 @@
 <div class="row" style="margin: 0px;">
   <div class="col-12">
+  <%= @cmp %>
     <h1 class="welcome-text text-center" style="margin: 70px 0px 0px;">My Profile</h1>
     <form action="<%= home_updateProfile_path() %>" method="post" autocomplete="off">
       <%= hidden_field_tag :authenticity_token, form_authenticity_token -%>
